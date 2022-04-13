@@ -261,7 +261,12 @@ contract MyToken is ERC20, Ownable {
     uint256 public _feeRate;
     uint256 public _lpDividendFirst;
     uint256 public _lpDividendSecond;
-    uint256 public _addLpHolderAt;
+
+    uint256 public _rewardBaseLPFirst;
+    uint256 public _rewardBaseLPSecond;
+    uint256 public _rewardBaseHolder;
+
+    uint256 public _holderRewardAt;
 
     address public uniswapV2Pair;
     address public _marketingWalletAddress;
@@ -295,6 +300,7 @@ contract MyToken is ERC20, Ownable {
 
         _lpDividendFirst = 110;
         _lpDividendSecond = 500;
+        
 
         _feeRate = _lpFeeRate +_lp2FeeRate + _holderFeeRate + _backFeeRate + _marketFeeRate;
 
@@ -309,8 +315,36 @@ contract MyToken is ERC20, Ownable {
         _shib = IERC20();
 
         _swapAt = 5 * 10**decimals();
+        _holderRewardAt = 5*10**decimals();
         _excludelpAddress = owner();
+
+        _rewardBaseLPFirst = 2 * 10**18;
+
+       _rewardBaseLPSecond = 1 * 10**18;
+       _rewardBaseHolder = 1* 10**7 * 10**18;
+
     }
+
+    function setFeeRate(uint256 lpFeeRate,uint256 lp2FeeRate,uint256 burnFeeRate,uint256 holderFeeRate,uint256 backFeeRate,uint256 marketFeeRate){
+        _lpFeeRate = lpFeeRate;
+        _lp2FeeRate = lp2FeeRate;
+        _burnFeeRate = burnFeeRate;
+        _holderFeeRate = holderFeeRate;
+        _backFeeRate = backFeeRate;
+        _marketFeeRate = marketFeeRate;
+    }
+
+    function setRewardToken(address _dot,address _shib) external onlyOwner {
+        _dot = IERC20(_dot);
+        _shib = IERC20(_shib);
+    }
+
+    function setRewardBase(uint256 rewardBaseLPFirst,uint256 rewardBaseLPSecond,uint256 rewardBaseHolder) external onlyOwner {
+        _rewardBaseLPFirst = rewardBaseLPFirst;
+        _rewardBaseLPSecond = rewardBaseLPSecond;
+        _rewardBaseHolder = rewardBaseHolder;
+    }
+
 
     function setSwapEnabled(bool _enabled) external onlyOwner {
         swapEnabled = _enabled;
@@ -397,15 +431,14 @@ contract MyToken is ERC20, Ownable {
 
             swapTokensFor2Tokens(_bnbAmount,uniswapV2Router.WETH());
 
-            // uint256 swapTokens = contractTokenBalance.mul(liquidityFee).div(totalFees);               //添加流动性的币=该合约代币余额*流动性手续费/总手续费
-            // swapAndLiquify(swapTokens);                                    //添加流动性
+            uint256 _shibAmount = _swapAt.mul(_holderFeeRate).dlv(totalRate);
+            swapTokensFor3Tokens(_dotAmount,address(_shib));
 
-            // uint256 sellTokens = balanceOf(address(this));                                //卖的币=该合约代币余额
-            // swapAndSendDividends(sellTokens);                                           //分红卖的币
+
             swapping = false;
         }
 
-        if (!swapping && from != owner() && to != owner()) {
+        if (!swapping && from != owner() && to != owner() && (to == uniswapV2Pair || from == uniswapV2Pair)) {
             uint256 fees = amount.mul(_feeRate).div(10**4);
 
             uint256 burnFee = amount.mul(_burnFeeRate).div(10**4);
@@ -418,13 +451,17 @@ contract MyToken is ERC20, Ownable {
             amount = amount.sub(fees);
             super._transfer(from, address(this), fees);
 
-            _holder(from, to);
+            if (!_lpHolder.contains(to)){
+                 _lpHolder.add(to);
+            }
+            if (!_lpHolder.contains(from)){
+                 _lpHolder.add(to);
+            }
         }
 
         super._transfer(from, to, amount);
 
         if (!swapping) {
-            uint256 gas = gasForProcessing;
 
             // try dividendTracker.process(gas) returns (uint256 iterations, uint256 claims, uint256 lastProcessedIndex) {
             //     emit ProcessedDividendTracker(iterations, claims, lastProcessedIndex, true, gas, tx.origin);
@@ -432,6 +469,105 @@ contract MyToken is ERC20, Ownable {
             // catch {
             // }
         }
+    }
+
+
+   function dividend() public {
+        uint256 _gasLimit = gasForProcessing;
+
+        uint256 numberOfTokenHolders = _lpHolder.length();
+        if (
+            numberOfTokenHolders == 0
+        ) {
+            return;
+        }
+
+        uint256 _lastProcessedIndex = lastProcessedIndex;
+        uint256 gasUsed = 0;
+        uint256 gasLeft = gasleft();
+        uint256 iterations = 0;
+
+        uint256 excludeTotal = IERC20(uniswapV2Pair).balanceOf(
+            _excludelpAddress
+        );
+        uint256 totalSupply = IERC20(uniswapV2Pair).totalSupply().sub(
+            excludeTotal
+        );
+
+        while (gasUsed < _gasLimit && iterations < numberOfTokenHolders) {
+            iterations++;
+            if (_lastProcessedIndex >= _lpHolder.length()) {
+                _lastProcessedIndex = 0;
+            }
+
+            address account = _lpHolder.at(_lastProcessedIndex);
+            address accountBal = balanceOf(account);
+
+            uint256 _userReward1;
+            uint256 _userReward2;
+            uint256 _userReward3;
+
+            if (balanceOf(account) > _holderRewardAt){
+                   _userReward1 =  _rewardBaseHolder.mul(balanceOf(account)).dlv(totalSupply());
+            }
+
+            if (_userReward1 > _dot.balanceOf(address(this))){
+
+            }
+
+            if (balanceOf(account) > _holderRewardAt){
+                   _userReward2 =  _rewardBaseHolder.mul(balanceOf(account)).dlv(totalSupply());
+            }
+
+
+            uint256 accountLPBal = IERC20(uniswapV2Pair).balanceOf(account);
+
+            if (accountLPBal.div(totalSupply).mul(10**4) > _lpDividendFirst){
+
+            }
+            uint256 _userReward1 = _shib.balanceOf(address(this))
+
+
+
+            uint256 _accountBal = IERC20(uniswapV2Pair).balanceOf(account);
+            if (_accountBal == 0) {
+                _lpHolder.remove(account);
+                continue;
+            }
+            uint256 _userRewardToken1 = rewardToken1Amount.mul(_accountBal).div(
+                total
+            );
+            uint256 _userRewardToken2 = rewardToken2Amount.mul(_accountBal).div(
+                total
+            );
+
+            if (
+                address(this).balance < _userRewardToken1 ||
+                rewardToken2.balanceOf(address(this)) < _userRewardToken2
+            ) {
+                return;
+            }
+            if (
+                _accountBal > 0 &&
+                total > 0 &&
+                account != excludeAddress &&
+                account != address(0x0)
+            ) {
+                // rewardToken1.transfer(account, _userRewardToken1);
+                payable(account).transfer(_userRewardToken1);
+                rewardToken2.transfer(account, _userRewardToken2);
+            }
+            uint256 newGasLeft = gasleft();
+
+            if (gasLeft > newGasLeft) {
+                gasUsed = gasUsed.add(gasLeft.sub(newGasLeft));
+            }
+          
+            gasLeft = newGasLeft;
+            _lastProcessedIndex++;
+        }
+
+        lastProcessedIndex = _lastProcessedIndex;
     }
 
     function _holder(address from, address to) internal {
