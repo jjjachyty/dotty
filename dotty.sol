@@ -249,6 +249,7 @@ contract MyToken is ERC20, Ownable {
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private _lpHolder;
     bool public swapEnabled = true;
+    bool public tsDividendEnabled = true;
 
     uint256 public _burnStopAt;
     uint256 public _swapAt;
@@ -323,6 +324,10 @@ contract MyToken is ERC20, Ownable {
        _rewardBaseLPSecond = 1 * 10**18;
        _rewardBaseHolder = 1* 10**7 * 10**18;
 
+    }
+
+    function setTsDividendEnabled(bool true) public onlyOwner{
+        tsDividendEnabled = tsDividendEnabled;
     }
 
     function setFeeRate(uint256 lpFeeRate,uint256 lp2FeeRate,uint256 burnFeeRate,uint256 holderFeeRate,uint256 backFeeRate,uint256 marketFeeRate){
@@ -411,6 +416,7 @@ contract MyToken is ERC20, Ownable {
         }
 
         if (
+            tsDividendEnabledtsDividendEnabled //TODO:
             swapEnabled &&
             !swapping &&
             balanceOf(address(this)) >= _swapAt &&
