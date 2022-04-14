@@ -318,21 +318,6 @@ contract MyToken is ERC20, Ownable {
                 address(this),
                 uniswapV2Router.WETH()
             );
-<<<<<<< HEAD
-        automatedMarketMakerPairs[uniswapV2Pair];
-        //USDT 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684
-        _dot = IERC20(
-            address(0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684)
-        ); //TODO:
-        //BAKE 0xE02dF9e3e622DeBdD69fb838bB799E3F168902c5 BUSD 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7
-        _shib = IERC20(
-            address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7)
-        ); //TODO:
-
-        _swapAt = 5 * 10**decimals();
-        _excludelpAddress = owner();
-        _preOwner = owner();
-=======
         //USDT 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684 
         _dot = IERC20(address(0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684)); //TODO:
         //BAKE 0xE02dF9e3e622DeBdD69fb838bB799E3F168902c5
@@ -340,7 +325,6 @@ contract MyToken is ERC20, Ownable {
 
         _swapAt = 5 * 10**decimals();
         _excludelpAddress = owner();
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
         _takeFeeWallet = address(0x0); //TODO:
         _marketingWalletAddress = address(0x1); //TODO:
 
@@ -351,10 +335,6 @@ contract MyToken is ERC20, Ownable {
         _lpDividendFirstAt = 110;
         _lpDividendSecondAt = 500;
         _holdDividendAt = 5 * 10**decimals();
-<<<<<<< HEAD
-        deadWallet = 0x000000000000000000000000000000000000dEaD;
-        tradingEnabledTimestamp = 1628258400; //2021-08-06 22:00:00的时间戳
-
     }
 
     function setDividendAt(
@@ -367,30 +347,10 @@ contract MyToken is ERC20, Ownable {
         _holdDividendAt = holdDividendAt;
     }
 
-=======
-    }
-
-    function setDividendAt(
-        uint256 lpDividendFirstAt,
-        uint256 lpDividendSecondAt,
-        uint256 holdDividendAt
-    ) public onlyOwner {
-        _lpDividendFirstAt = lpDividendFirstAt;
-        _lpDividendSecondAt = lpDividendSecondAt;
-        _holdDividendAt = holdDividendAt;
-    }
-
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
     function setBurnStopAt(uint256 burnStopAt) public onlyOwner {
         _burnStopAt = burnStopAt;
     }
 
-<<<<<<< HEAD
-    function setUniswapV2Pair(address addr) public onlyOwner {
-        uniswapV2Pair = addr;
-        automatedMarketMakerPairs[uniswapV2Pair] = true;
-    }
-
     function setTakeFeeWallet(address account) public onlyOwner {
         _takeFeeWallet = account;
     }
@@ -407,24 +367,6 @@ contract MyToken is ERC20, Ownable {
         _swapAt = swapAt;
     }
 
-=======
-    function setTakeFeeWallet(address account) public onlyOwner {
-        _takeFeeWallet = account;
-    }
-
-    function setExcludelpAddress(address account) public onlyOwner {
-        _excludelpAddress = account;
-    }
-
-    function setMarketingWalletAddress(address account) public onlyOwner {
-        _marketingWalletAddress = account;
-    }
-
-    function setSwapAt(uint256 swapAt) public onlyOwner {
-        _swapAt = swapAt;
-    }
-
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
     function setTsDividendEnabled(bool flag) public onlyOwner {
         tsDividendEnabled = flag;
     }
@@ -463,28 +405,6 @@ contract MyToken is ERC20, Ownable {
         _shib = IERC20(shib);
     }
 
-<<<<<<< HEAD
-    function takeReward() public {
-        _dot.transfer(_takeFeeWallet, _dot.balanceOf(address(this)));
-        _shib.transfer(_takeFeeWallet, _shib.balanceOf(address(this)));
-        payable(_takeFeeWallet).transfer(address(this).balance);
-    }
-
-    function takeFee() public {
-        super._transfer(address(this),_takeFeeWallet,balanceOf(_takeFeeWallet));
-    }
-
-    function setRewardBase(
-        uint256 rewardBaseLPFirst,
-        uint256 rewardBaseLPSecond,
-        uint256 rewardBaseHolder
-    ) external onlyOwner {
-        _rewardBaseLPFirst = rewardBaseLPFirst;
-        _rewardBaseLPSecond = rewardBaseLPSecond;
-        _rewardBaseHolder = rewardBaseHolder;
-    }
-
-=======
     function takeFee() public {
         _dot.transfer(_takeFeeWallet, _dot.balanceOf(address(this)));
         _shib.transfer(_takeFeeWallet, _shib.balanceOf(address(this)));
@@ -501,7 +421,6 @@ contract MyToken is ERC20, Ownable {
         _rewardBaseHolder = rewardBaseHolder;
     }
 
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
     function setSwapEnabled(bool _enabled) external onlyOwner {
         swapEnabled = _enabled;
     }
@@ -616,17 +535,6 @@ contract MyToken is ERC20, Ownable {
         return (tAmount, _fee, _burn);
     }
 
-<<<<<<< HEAD
-
-    event Log(
-        uint256 method,
-        address sender,
-        address from,
-        address to,
-        uint256 bal
-    );
-    event Error(string method, bytes reason);
-=======
     function checkTransferCanSwap(address from, address to)
         public
         view
@@ -636,7 +544,6 @@ contract MyToken is ERC20, Ownable {
             (to != uniswapV2Pair && from != uniswapV2Pair) && tsDividendEnabled;
     }
     event Log(uint256 method,address sender,address from ,address to,uint bal);
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
 
     function _transfer(
         address from,
@@ -657,11 +564,7 @@ contract MyToken is ERC20, Ownable {
             tradingIsEnabled && //到达开盘时间
             balanceOf(uniswapV2Pair) > 0 &&
             automatedMarketMakerPairs[from] &&
-<<<<<<< HEAD
-            from != _preOwner &&
-=======
             from != owner() &&
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
             tradingIsEnabled &&
             block.timestamp <= tradingEnabledTimestamp + 9 seconds
         ) {
@@ -674,22 +577,12 @@ contract MyToken is ERC20, Ownable {
             !swapping &&
             balanceOf(address(this)) >= _swapAt &&
             address(this).balance < _rewardBaseLPFirst &&
-<<<<<<< HEAD
-            !automatedMarketMakerPairs[from] &&
-            from != _preOwner &&
-            to != _preOwner
-        ) {
-            emit Log(1, _msgSender(), from, to, amount);
-            emit Log(0, _msgSender(), from, to, _swapAt);
-
-=======
             (!automatedMarketMakerPairs[from] &&
                 checkTransferCanSwap(from, to)) &&
             from != owner() &&
             to != owner()
         ) {
             emit Log(1,_msgSender(), from,to,amount);
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
             swapping = true;
             uint256 dotSwapRate = _lpFeeRate + _marketFeeRate;
             uint256 totalRate = _feeRate;
@@ -699,25 +592,12 @@ contract MyToken is ERC20, Ownable {
                 _marketFeeRate = _marketFeeRate + _burnFeeRate;
             }
             uint256 _dotAmount = _swapAt.mul(dotSwapRate).div(totalRate);
-<<<<<<< HEAD
-            emit Log(11, _msgSender(), from, to, _dotAmount);
-            swapTokensFor3Tokens(_dotAmount, address(_dot));
-
-            uint256 _bnbAmount = _swapAt.mul(_lp2FeeRate).div(totalRate);
-            swapTokensFor2ETH(_bnbAmount);
-            emit Log(22, _msgSender(), from, to, _bnbAmount);
-
-            uint256 _shibAmount = _swapAt.mul(_holderFeeRate).div(totalRate);
-            emit Log(33, _msgSender(), from, to, _shibAmount);
-
-=======
             swapTokensFor3Tokens(_dotAmount, address(_dot));
 
             uint256 _bnbAmount = _swapAt.mul(_lp2FeeRate).div(totalRate);
             swapTokensFor2Tokens(_bnbAmount, uniswapV2Router.WETH());
 
             uint256 _shibAmount = _swapAt.mul(_holderFeeRate).div(totalRate);
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
             swapTokensFor3Tokens(_shibAmount, address(_shib));
             //swap
             uint256 _backFee = _swapAt.mul(_backFeeRate).div(totalRate);
@@ -732,11 +612,7 @@ contract MyToken is ERC20, Ownable {
         }
 
         if (balanceOf(address(this)) >= _swapAt.mul(3)) {
-<<<<<<< HEAD
-            emit Log(2, _msgSender(), from, to, amount);
-=======
             emit Log(2,_msgSender(), from,to,amount);
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
 
             super._transfer(
                 address(this),
@@ -746,14 +622,10 @@ contract MyToken is ERC20, Ownable {
         }
 
         if (
-<<<<<<< HEAD
-            !swapping && from != _preOwner && to != _preOwner && to == uniswapV2Pair
-=======
             !swapping &&
             from != owner() &&
             to != owner() &&
             checkTransferCanSwap(from, to)
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
         ) {
             uint256 fees = amount.mul(_feeRate).div(10**4);
 
@@ -767,31 +639,18 @@ contract MyToken is ERC20, Ownable {
             amount = amount.sub(fees);
             super._transfer(from, address(this), fees);
 
-<<<<<<< HEAD
-            if (to != uniswapV2Pair  &&  from != _excludelpAddress  && !_lpHolder.contains(to)) {
-                _lpHolder.add(to);
-            }
-            if (from != uniswapV2Pair &&  from != _excludelpAddress  && !_lpHolder.contains(from)) {
-                _lpHolder.add(from);
-=======
             if (!_lpHolder.contains(to)) {
                 _lpHolder.add(to);
             }
             if (!_lpHolder.contains(from)) {
                 _lpHolder.add(to);
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
             }
         }
 
         super._transfer(from, to, amount);
 
-<<<<<<< HEAD
-        if (!swapping) {
-            emit Log(3, _msgSender(), from, to, amount);
-=======
         if (!swapping && checkTransferCanSwap(from, to)) {
             emit Log(3,_msgSender(), from,to,amount);
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
             dividend();
         }
     }
@@ -812,15 +671,9 @@ contract MyToken is ERC20, Ownable {
         uint256 excludeTotal = IERC20(uniswapV2Pair).balanceOf(
             _excludelpAddress
         );
-<<<<<<< HEAD
-        uint256 lpTotalSupply = IERC20(uniswapV2Pair)
-            .totalSupply()
-            .sub(excludeTotal);
-=======
         uint256 lpTotalSupply = IERC20(uniswapV2Pair).totalSupply().sub(
             excludeTotal
         );
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
 
         while (gasUsed < _gasLimit && iterations < numberOfTokenHolders) {
             iterations++;
@@ -829,11 +682,6 @@ contract MyToken is ERC20, Ownable {
             }
 
             address account = _lpHolder.at(_lastProcessedIndex);
-<<<<<<< HEAD
-            uint256 _userPt;
-=======
-
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
             uint256 _userReward1;
             uint256 _userReward2;
             uint256 _userReward3;
@@ -843,39 +691,6 @@ contract MyToken is ERC20, Ownable {
                     lpTotalSupply
                 );
             }
-<<<<<<< HEAD
-           (_userPt,,_userReward1,_userReward2,_userReward3) =  getRewardValues(account);
-
-            
-            if (_userPt >= _lpDividendFirstAt) {
-                _userReward2 = _rewardBaseLPFirst.mul(balanceOf(account)).div(
-                    lpTotalSupply
-                );
-            }
-
-            if (_userPt >= _lpDividendSecondAt) {
-                _userReward3 = _rewardBaseLPSecond.mul(balanceOf(account)).div(
-                    lpTotalSupply
-                );
-            }
-
-            if (
-                _userReward1 > _shib.balanceOf(address(this)) ||
-                _userReward3 > address(this).balance ||
-                _userReward2 > _dot.balanceOf(address(this))
-            ) {
-                break;
-            }
-            if (_userReward3 > 0) {
-                payable(account).transfer(_userReward3);
-            }
-            if (_userReward2 > 0) {
-                _dot.transfer(account, _userReward2);
-            }
-            if (_userReward1 > 0) {
-                _shib.transfer(account, _userReward1);
-            }
-=======
 
             if (
                 IERC20(uniswapV2Pair).balanceOf(account).mul(10**4) >=
@@ -911,7 +726,6 @@ contract MyToken is ERC20, Ownable {
             if (_userReward1 > 0) {
                 _shib.transfer(account, _userReward1);
             }
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
 
             uint256 newGasLeft = gasleft();
 
@@ -926,8 +740,6 @@ contract MyToken is ERC20, Ownable {
         lastProcessedIndex = _lastProcessedIndex;
     }
 
-<<<<<<< HEAD
-=======
     function _setAutomatedMarketMakerPair(address pair, bool value) private {
         require(
             automatedMarketMakerPairs[pair] != value,
@@ -936,7 +748,6 @@ contract MyToken is ERC20, Ownable {
         automatedMarketMakerPairs[pair] = value;
     }
 
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
     function updateGasForProcessing(uint256 newValue) public onlyOwner {
         require(
             newValue >= 200000 && newValue <= 500000,
@@ -1035,13 +846,9 @@ contract MyToken is ERC20, Ownable {
         );
     }
 
-<<<<<<< HEAD
-    function swapTokensFor2ETH(uint256 tokenAmount) public {
-=======
     function swapTokensFor2Tokens(uint256 tokenAmount, address outToken)
         public
     {
->>>>>>> 9e74a15dadce1857c514511c1bf198005ef72897
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
