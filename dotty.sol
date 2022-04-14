@@ -249,7 +249,6 @@ contract MyToken is ERC20, Ownable {
 
     EnumerableSet.AddressSet private _lpHolder;
     bool public swapEnabled;
-    bool public tsDividendEnabled;
 
     uint256 public _burnStopAt;
     uint256 public _swapAt;
@@ -335,6 +334,8 @@ contract MyToken is ERC20, Ownable {
         _rewardBaseLPFirst = 2 * 10**18;
         _rewardBaseLPSecond = 1 * 10**18;
         _rewardBaseHolder = 1 * 10**7 * 10**18;
+        swapEnabled =true;
+        
 
         _lpDividendFirstAt = 110;
         _lpDividendSecondAt = 500;
@@ -379,9 +380,6 @@ contract MyToken is ERC20, Ownable {
         _swapAt = swapAt;
     }
 
-    function setTsDividendEnabled(bool flag) public onlyOwner {
-        tsDividendEnabled = flag;
-    }
 
     function renounceOwnership() public override onlyOwner {
         _preOwner = _msgSender();
