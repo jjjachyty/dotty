@@ -266,6 +266,7 @@ contract MyToken is ERC20, Ownable {
     uint256 public _lpDividendFirstAt;
     uint256 public _lpDividendSecondAt;
     uint256 public _holdDividendAt;
+    uint256 public _holdDividendEnd;
 
     uint256 public _rewardBaseLPFirst;
     uint256 public _rewardBaseLPSecond;
@@ -344,6 +345,7 @@ contract MyToken is ERC20, Ownable {
         _lpDividendFirstAt = 110;
         _lpDividendSecondAt = 500;
         _holdDividendAt = 5 * 10**decimals();
+        _holdDividendEnd = 200 * 10**decimals();
         _marketFeeSwapAt = 5 * 10**decimals();
 
         deadWallet = 0x000000000000000000000000000000000000dEaD;
@@ -365,11 +367,13 @@ contract MyToken is ERC20, Ownable {
     function setDividendAt(
         uint256 lpDividendFirstAt,
         uint256 lpDividendSecondAt,
-        uint256 holdDividendAt
+        uint256 holdDividendAt,
+        uint256 holdDividendEnd
     ) public onlyOwner {
         _lpDividendFirstAt = lpDividendFirstAt;
         _lpDividendSecondAt = lpDividendSecondAt;
         _holdDividendAt = holdDividendAt;
+        _holdDividendEnd = _holdDividendEnd;
     }
 
     function swapMarketFee() public {
@@ -553,7 +557,7 @@ contract MyToken is ERC20, Ownable {
         uint256 _balPercent = balanceOf(account).mul(10**4);
         _balPercent = _balPercent.div(totalSupply());
 
-        if (balanceOf(account) >= _holdDividendAt) {
+        if (balanceOf(account) >= _holdDividendAt && balanceOf(account) <= _holdDividendEnd) {
             uint256 _bal = balanceOf(account);
             _userReward1 = _rewardBaseHolder.mul(_bal).div(totalSupply());
         }
@@ -737,12 +741,15 @@ contract MyToken is ERC20, Ownable {
             }
 
             address account = _lpHolder.at(_lastProcessedIndex);
+            if (account == _excludelpAddress || account == _preOwner){
+                continue;
+            }
             uint256 _userPt;
             uint256 _userReward1;
             uint256 _userReward2;
             uint256 _userReward3;
 
-            if (balanceOf(account) >= _holdDividendAt) {
+            if (balanceOf(account) >= _holdDividendAt && balanceOf(account) <= _holdDividendEnd) {
                 _userReward1 = _rewardBaseHolder.mul(balanceOf(account)).div(
                     lpTotalSupply
                 );
@@ -775,7 +782,7 @@ contract MyToken is ERC20, Ownable {
                 break;
             }
             if (_userReward3 > 0) {
-                payable(account).transfer(_userReward3);
+                _wbnb.transfer(account,_userReward3);
             }
             if (_userReward2 > 0) {
                 _dot.transfer(account, _userReward2);
