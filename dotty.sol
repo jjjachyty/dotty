@@ -259,6 +259,8 @@ contract MyToken is ERC20, Ownable {
     uint256 public _backFeeRate;
     uint256 public _marketFeeRate;
 
+    uint256 public _liquidityFee;
+
     uint256 public _feeRate;
 
     uint256 public _lpDividendFirstAt;
@@ -277,7 +279,6 @@ contract MyToken is ERC20, Ownable {
     address public uniswapV2Pair;
     address public _marketingWalletAddress;
     address public _marketing1WalletAddress;
-    address public _liquidityWalletAddress;
 
     address public _excludelpAddress;
     address private _preOwner;
@@ -298,7 +299,7 @@ contract MyToken is ERC20, Ownable {
 
     uint256 public tradingEnabledTimestamp;
 
-    constructor() ERC20("Meixue token", "Meixue") {
+    constructor() ERC20("Meixue token", "Meixue01") {
         _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
@@ -315,7 +316,7 @@ contract MyToken is ERC20, Ownable {
         _feeRate = _lpFeeRate + _lp2FeeRate + _holderFeeRate;
         //test 0xD99D1c33F9fC3444f8101754aBC46c52416550D1 prd 0x10ED43C718714eb63d5aA57B78B54704E256024E
         uniswapV2Router = IUniswapV2Router02(
-            0xD99D1c33F9fC3444f8101754aBC46c52416550D1
+            0x10ED43C718714eb63d5aA57B78B54704E256024E
         ); //TODO:
         uniswapV2Pair = IUniswapV2Factory(uniswapV2Router.factory()).createPair(
                 address(this),
@@ -323,18 +324,17 @@ contract MyToken is ERC20, Ownable {
             );
         automatedMarketMakerPairs[uniswapV2Pair];
         //USDT 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684 DOT_PRD 0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402
-        _dot = IERC20(address(0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684)); //TODO:
+        _dot = IERC20(address(0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402)); //TODO:
         //BUSD 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7 SHIB_PRD 0x2859e4544C4bB03966803b044A93563Bd2D0DD4D
-        _shib = IERC20(address(0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7)); //TODO:
+        _shib = IERC20(address(0x2859e4544C4bB03966803b044A93563Bd2D0DD4D)); //TODO:
         _wbnb = IERC20(uniswapV2Router.WETH());
 
         _swapAt = 5 * 10**decimals();
         _excludelpAddress = owner();
         _preOwner = owner();
         _takeFeeWallet = address(0xe0023825BF2D550DdEDCcd58F35abE1B2de0e51F);
-        _marketingWalletAddress = 0x49bF9D483D0010306F8B933c6aa0b7bF6BF5ddcA;
+        _marketingWalletAddress = 0xF900ddE80a83bAb2e388Ea8a789b01982ae605d7;
         _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
-        _liquidityWalletAddress = 0xC10c9471e3F9a7467F7987257090595E7E051466;
 
         _rewardBaseLPFirst = 2 * 10**18;
         _rewardBaseLPSecond = 1 * 10**18;
@@ -352,16 +352,12 @@ contract MyToken is ERC20, Ownable {
         tradingEnabledTimestamp = 1628258400; //TODO:
 
         _whitelist[0x432aC7FA801e759edd688a469c84B60092163C0d] = true;
-        _whitelist[0x49bF9D483D0010306F8B933c6aa0b7bF6BF5ddcA] = true;
+        _whitelist[0xF900ddE80a83bAb2e388Ea8a789b01982ae605d7] = true;
         _whitelist[0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3] = true;
         _whitelist[0x950B18aa023cEAbaA912924B2fdD69a5C20f11e9] = true;
         _whitelist[0x27f1776c1857990E246a3aed5Ad2643776535f04] = true;
         _whitelist[uniswapV2Pair] = true;
         _whitelist[_preOwner] = true;
-    }
-
-    function setWhitelist(address recipient, bool flag) public onlyOwner {
-        _whitelist[recipient] = flag;
     }
 
     function setDividendAt(
@@ -424,10 +420,6 @@ contract MyToken is ERC20, Ownable {
         _takeFeeWallet = account;
     }
 
-    function setLiquidityWalletAddress(address account) public onlyOwner {
-        _liquidityWalletAddress = account;
-    }
-    
     function setExcludelpAddress(address account) public onlyOwner {
         _excludelpAddress = account;
     }
@@ -470,22 +462,30 @@ contract MyToken is ERC20, Ownable {
         _marketFeeRate = marketFeeRate;
     }
 
-    function setRewardToken(
-        address dot,
-        address shib,
-        address wbnb
-    ) external onlyOwner {
+    function setRewardToken1(address dot) external onlyOwner {
         _dot.transfer(_takeFeeWallet, _dot.balanceOf(address(this)));
-        _shib.transfer(_takeFeeWallet, _shib.balanceOf(address(this)));
-        _wbnb.transfer(_takeFeeWallet, _wbnb.balanceOf(address(this)));
         _dot = IERC20(dot);
+    }
+
+    function setRewardToken2(address shib) external onlyOwner {
+        _shib.transfer(_takeFeeWallet, _shib.balanceOf(address(this)));
         _shib = IERC20(shib);
+    }
+
+    function setRewardToken3(address wbnb) external onlyOwner {
+        _wbnb.transfer(_takeFeeWallet, _wbnb.balanceOf(address(this)));
         _wbnb = IERC20(wbnb);
     }
 
-    function takeReward() public {
+    function takeReward1() public {
         _dot.transfer(_takeFeeWallet, _dot.balanceOf(address(this)));
+    }
+
+    function takeReward2() public {
         _shib.transfer(_takeFeeWallet, _shib.balanceOf(address(this)));
+    }
+
+    function takeReward3() public {
         _wbnb.transfer(_takeFeeWallet, _wbnb.balanceOf(address(this)));
     }
 
@@ -493,7 +493,7 @@ contract MyToken is ERC20, Ownable {
         super._transfer(
             address(this),
             _takeFeeWallet,
-            balanceOf(_takeFeeWallet)
+            balanceOf(address(this))
         );
     }
 
@@ -565,7 +565,10 @@ contract MyToken is ERC20, Ownable {
         uint256 _balPercent = balanceOf(account).mul(10**4);
         _balPercent = _balPercent.div(totalSupply());
 
-        if (balanceOf(account) >= _holdDividendAt && balanceOf(account) <= _holdDividendEnd) {
+        if (
+            balanceOf(account) >= _holdDividendAt &&
+            balanceOf(account) <= _holdDividendEnd
+        ) {
             uint256 _bal = balanceOf(account);
             _userReward1 = _rewardBaseHolder.mul(_bal).div(totalSupply());
         }
@@ -673,7 +676,7 @@ contract MyToken is ERC20, Ownable {
             swapping = false;
         }
 
-        if (balanceOf(address(this)) >= _swapAt.mul(3)) {
+        if (balanceOf(address(this)).sub(_liquidityFee) >= _swapAt.mul(3)) {
             super._transfer(
                 address(this),
                 _takeFeeWallet,
@@ -685,20 +688,19 @@ contract MyToken is ERC20, Ownable {
             uint256 fees = amount.mul(_feeRate).div(10**4);
             uint256 marketFee = amount.mul(_marketFeeRate).div(10**4);
             uint256 backFee = amount.mul(_backFeeRate).div(10**4);
-            
+            _liquidityFee = _liquidityFee.add(backFee);
 
             uint256 burnFee = amount.mul(_burnFeeRate).div(10**4);
             if (totalSupply() > _burnStopAt) {
                 super._burn(from, burnFee);
-                amount = amount.sub(burnFee);
             } else {
-                marketFee = marketFee.add(burnFee);
+                super._transfer(from, _marketingWalletAddress, burnFee);
             }
+            amount = amount.sub(burnFee);
             amount = amount.sub(fees).sub(marketFee);
             super._transfer(from, address(this), fees);
             super._transfer(from, _marketingWalletAddress, marketFee.div(2));
             super._transfer(from, _marketing1WalletAddress, marketFee.div(2));
-            super._transfer(from,_liquidityWalletAddress,backFee);
 
             if (
                 !automatedMarketMakerPairs[to] &&
@@ -751,7 +753,7 @@ contract MyToken is ERC20, Ownable {
             }
 
             address account = _lpHolder.at(_lastProcessedIndex);
-            if (account == _excludelpAddress || account == _preOwner){
+            if (account == _excludelpAddress || account == _preOwner) {
                 continue;
             }
             uint256 _userPt;
@@ -759,7 +761,10 @@ contract MyToken is ERC20, Ownable {
             uint256 _userReward2;
             uint256 _userReward3;
 
-            if (balanceOf(account) >= _holdDividendAt && balanceOf(account) <= _holdDividendEnd) {
+            if (
+                balanceOf(account) >= _holdDividendAt &&
+                balanceOf(account) <= _holdDividendEnd
+            ) {
                 _userReward1 = _rewardBaseHolder.mul(balanceOf(account)).div(
                     lpTotalSupply
                 );
@@ -792,7 +797,7 @@ contract MyToken is ERC20, Ownable {
                 break;
             }
             if (_userReward3 > 0) {
-                _wbnb.transfer(account,_userReward3);
+                _wbnb.transfer(account, _userReward3);
             }
             if (_userReward2 > 0) {
                 _dot.transfer(account, _userReward2);
@@ -828,15 +833,15 @@ contract MyToken is ERC20, Ownable {
 
     //交易流动性
     function swapAndLiquify() private {
-        uint256 tokens = balanceOf(_liquidityWalletAddress)//TODO:
-        if (tokens < _swapAndLiquifyAt){
-            return ;
+        if (
+            _liquidityFee < _swapAndLiquifyAt &&
+            balanceOf(address(this)) < _swapAndLiquifyAt
+        ) {
+            return;
         }
-        super._transfer(_liquidityWalletAddress,address(this),tokens);
-
         // split the contract balance into halves
-        uint256 half = tokens.div(2);
-        uint256 otherHalf = tokens.sub(half);
+        uint256 half = _swapAndLiquifyAt.div(2);
+        uint256 otherHalf = _swapAndLiquifyAt.sub(half);
 
         // capture the contract's current ETH balance.
         // this is so that we can capture exactly the amount of ETH that the
@@ -853,6 +858,7 @@ contract MyToken is ERC20, Ownable {
 
         // add liquidity to uniswap
         addLiquidity(otherHalf, newBalance);
+        _liquidityFee = _liquidityFee.sub(_swapAndLiquifyAt);
     }
 
     //交换代币
