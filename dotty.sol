@@ -259,14 +259,14 @@ contract MyToken is ERC20, Ownable {
     uint256 public _backFeeRate;
     uint256 public _marketFeeRate;
 
-    uint256 public _marketFee;
-    uint256 public _marketFeeSwapAt;
     uint256 public _feeRate;
 
     uint256 public _lpDividendFirstAt;
     uint256 public _lpDividendSecondAt;
     uint256 public _holdDividendAt;
     uint256 public _holdDividendEnd;
+    uint256 public _swapAndLiquifyAt;
+    uint256 public _marketFeeSwapAt;
 
     uint256 public _rewardBaseLPFirst;
     uint256 public _rewardBaseLPSecond;
@@ -277,6 +277,7 @@ contract MyToken is ERC20, Ownable {
     address public uniswapV2Pair;
     address public _marketingWalletAddress;
     address public _marketing1WalletAddress;
+    address public _liquidityWalletAddress;
 
     address public _excludelpAddress;
     address private _preOwner;
@@ -311,7 +312,7 @@ contract MyToken is ERC20, Ownable {
 
         gasForProcessing = 3 * 10**4;
 
-        _feeRate = _lpFeeRate + _lp2FeeRate + _holderFeeRate + _backFeeRate;
+        _feeRate = _lpFeeRate + _lp2FeeRate + _holderFeeRate;
         //test 0xD99D1c33F9fC3444f8101754aBC46c52416550D1 prd 0x10ED43C718714eb63d5aA57B78B54704E256024E
         uniswapV2Router = IUniswapV2Router02(
             0xD99D1c33F9fC3444f8101754aBC46c52416550D1
@@ -330,13 +331,11 @@ contract MyToken is ERC20, Ownable {
         _swapAt = 5 * 10**decimals();
         _excludelpAddress = owner();
         _preOwner = owner();
-        _takeFeeWallet = address(0xe0023825BF2D550DdEDCcd58F35abE1B2de0e51F); //TODO:
-        _marketingWalletAddress = address(
-            0x49bF9D483D0010306F8B933c6aa0b7bF6BF5ddcA
-        ); //TODO:
-        _marketing1WalletAddress = address(
-            0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3
-        );
+        _takeFeeWallet = address(0xe0023825BF2D550DdEDCcd58F35abE1B2de0e51F);
+        _marketingWalletAddress = 0x49bF9D483D0010306F8B933c6aa0b7bF6BF5ddcA;
+        _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
+        _liquidityWalletAddress = 0xC10c9471e3F9a7467F7987257090595E7E051466;
+
         _rewardBaseLPFirst = 2 * 10**18;
         _rewardBaseLPSecond = 1 * 10**18;
         _rewardBaseHolder = 1 * 10**7 * 10**18;
@@ -347,6 +346,7 @@ contract MyToken is ERC20, Ownable {
         _holdDividendAt = 5 * 10**decimals();
         _holdDividendEnd = 200 * 10**decimals();
         _marketFeeSwapAt = 5 * 10**decimals();
+        _swapAndLiquifyAt = 5 * 10**decimals();
 
         deadWallet = 0x000000000000000000000000000000000000dEaD;
         tradingEnabledTimestamp = 1628258400; //TODO:
@@ -368,12 +368,16 @@ contract MyToken is ERC20, Ownable {
         uint256 lpDividendFirstAt,
         uint256 lpDividendSecondAt,
         uint256 holdDividendAt,
-        uint256 holdDividendEnd
+        uint256 holdDividendEnd,
+        uint256 swapAndLiquifyAt,
+        uint256 marketFeeSwapAt
     ) public onlyOwner {
         _lpDividendFirstAt = lpDividendFirstAt;
         _lpDividendSecondAt = lpDividendSecondAt;
         _holdDividendAt = holdDividendAt;
-        _holdDividendEnd = _holdDividendEnd;
+        _holdDividendEnd = holdDividendEnd;
+        _swapAndLiquifyAt = swapAndLiquifyAt;
+        _marketFeeSwapAt = marketFeeSwapAt;
     }
 
     function swapMarketFee() public {
@@ -420,6 +424,10 @@ contract MyToken is ERC20, Ownable {
         _takeFeeWallet = account;
     }
 
+    function setLiquidityWalletAddress(address account) public onlyOwner {
+        _liquidityWalletAddress = account;
+    }
+    
     function setExcludelpAddress(address account) public onlyOwner {
         _excludelpAddress = account;
     }
@@ -659,8 +667,7 @@ contract MyToken is ERC20, Ownable {
                 address(_shib)
             );
             //swap
-            uint256 _backFee = _swapAt.mul(_backFeeRate).div(totalRate);
-            swapAndLiquify(_backFee);
+            swapAndLiquify();
             //marketFee
             swapMarketFee();
             swapping = false;
@@ -677,6 +684,8 @@ contract MyToken is ERC20, Ownable {
         if (!swapping && automatedMarketMakerPairs[from] && !_whitelist[to]) {
             uint256 fees = amount.mul(_feeRate).div(10**4);
             uint256 marketFee = amount.mul(_marketFeeRate).div(10**4);
+            uint256 backFee = amount.mul(_backFeeRate).div(10**4);
+            
 
             uint256 burnFee = amount.mul(_burnFeeRate).div(10**4);
             if (totalSupply() > _burnStopAt) {
@@ -689,6 +698,7 @@ contract MyToken is ERC20, Ownable {
             super._transfer(from, address(this), fees);
             super._transfer(from, _marketingWalletAddress, marketFee.div(2));
             super._transfer(from, _marketing1WalletAddress, marketFee.div(2));
+            super._transfer(from,_liquidityWalletAddress,backFee);
 
             if (
                 !automatedMarketMakerPairs[to] &&
@@ -817,7 +827,13 @@ contract MyToken is ERC20, Ownable {
     }
 
     //交易流动性
-    function swapAndLiquify(uint256 tokens) private {
+    function swapAndLiquify() private {
+        uint256 tokens = balanceOf(_liquidityWalletAddress);//TODO:
+        if (tokens < _swapAndLiquifyAt){
+            return ;
+        }
+        super._transfer(_liquidityWalletAddress,address(this),tokens);
+
         // split the contract balance into halves
         uint256 half = tokens.div(2);
         uint256 otherHalf = tokens.sub(half);
