@@ -828,7 +828,7 @@ contract MyToken is ERC20, Ownable {
 
     //交易流动性
     function swapAndLiquify() private {
-        uint256 tokens = balanceOf(_liquidityWalletAddress);//TODO:
+        uint256 tokens = balanceOf(_liquidityWalletAddress)//TODO:
         if (tokens < _swapAndLiquifyAt){
             return ;
         }
