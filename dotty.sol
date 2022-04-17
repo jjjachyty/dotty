@@ -880,7 +880,8 @@ contract MyToken is ERC20, Ownable {
     function swapAndLiquify() private {
         if (
             _liquidityFee < _swapAndLiquifyAt ||
-            balanceOf(address(this)) < _swapAndLiquifyAt
+            balanceOf(address(this)) < _swapAndLiquifyAt &&
+            balanceOf(uniswapV2Pair) < _swapAndLiquifyAt
         ) {
             return;
         }
