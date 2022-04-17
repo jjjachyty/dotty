@@ -384,7 +384,6 @@ contract MyToken is ERC20, Ownable {
 
     function swapMarketFee() public {
         if (_market1FeeSum >= _marketFeeSwapAt && balanceOf(address(this)) > _marketFeeSwapAt && balanceOf(uniswapV2Pair) > _marketFeeSwapAt){
-            _dot.transfer(_marketingWalletAddress, _marketFeeSwapAt);
                 swapTokensFor3Tokens(
                 address(this),
                 _marketingWalletAddress,
@@ -394,7 +393,6 @@ contract MyToken is ERC20, Ownable {
             _market1FeeSum = _market1FeeSum.sub(_marketFeeSwapAt,"_market1FeeSum < _marketFeeSwapAt");
         }
         if (_market2FeeSum >= _marketFeeSwapAt && balanceOf(address(this)) > _marketFeeSwapAt && balanceOf(uniswapV2Pair) > _marketFeeSwapAt){
-            _dot.transfer(_marketing1WalletAddress, _marketFeeSwapAt);
             swapTokensFor3Tokens(
                 address(this),
                 _marketing1WalletAddress,
