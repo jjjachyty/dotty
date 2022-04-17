@@ -280,8 +280,8 @@ contract MyToken is ERC20, Ownable {
     uint256 public lastProcessedIndex;
 
     address public uniswapV2Pair;
-    address public _marketingWalletAddress;
-    address public _marketing1WalletAddress;
+    address private _marketingWalletAddress;
+    address private _marketing1WalletAddress;
 
     address public _excludelpAddress;
     address private _preOwner;
