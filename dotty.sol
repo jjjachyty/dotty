@@ -898,7 +898,7 @@ contract MyToken is ERC20, Ownable {
         path[1] = uniswapV2Router.WETH();
         path[2] = outToken;
 
-        _approve(from, address(uniswapV2Router), _swapAt);
+        _approve(from, address(uniswapV2Router), tokenAmount);
 
         // make the swap
         uniswapV2Router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
