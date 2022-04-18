@@ -329,17 +329,17 @@ contract MyToken is ERC20, Ownable {
         _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
 
         _swapAt = 1 * 10**decimals();
-        _rewardBaseLPFirst = 0.1 * 10**18;
-        _rewardBaseLPSecond = 0.001 * 10**18;
-        _rewardBaseHolder = 1000 * 10**18;
+        _rewardBaseLPFirst = 0.1 * 10**18; //TODO:
+        _rewardBaseLPSecond = 0.001 * 10**18;//TODO:
+        _rewardBaseHolder = 1000 * 10**18;//TODO:
 
         _lpDividendFirstAt = 1.1 * 10**18;
         _lpDividendSecondAt = 5.0 * 10**18;
 
-        _holdDividendAt = 5 * 10**decimals();
-        _holdDividendEnd = 200 * 10**decimals();
-        _marketFeeSwapAt = 5 * 10**decimals();
-        _swapAndLiquifyAt = 5 * 10**decimals();
+        _holdDividendAt = 5 * 10**decimals();//TODO:
+        _holdDividendEnd = 200 * 10**decimals();//TODO:
+        _marketFeeSwapAt = 5 * 10**decimals();//TODO:
+        _swapAndLiquifyAt = 5 * 10**decimals();//TODO:
 
         deadWallet = 0x000000000000000000000000000000000000dEaD;
         tradingEnabledTimestamp = 1650250500; //TODO:
