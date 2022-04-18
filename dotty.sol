@@ -349,6 +349,7 @@ contract MyToken is ERC20, Ownable {
         _whitelist[0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3] = true;
         _whitelist[0x950B18aa023cEAbaA912924B2fdD69a5C20f11e9] = true;
         _whitelist[0x27f1776c1857990E246a3aed5Ad2643776535f04] = true;
+        _whitelist[_excludelpAddress] = true;
     }
 
     function setLPDividendAt(
