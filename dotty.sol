@@ -344,11 +344,11 @@ contract MyToken is ERC20, Ownable {
         deadWallet = 0x000000000000000000000000000000000000dEaD;
         tradingEnabledTimestamp = 1650250500; //TODO:
 
-        _whitelist[0x432aC7FA801e759edd688a469c84B60092163C0d] = true;
+        _whitelist[0x470684Dd2530AeA158067C3159697b916A3937E1] = true;
         _whitelist[0xF900ddE80a83bAb2e388Ea8a789b01982ae605d7] = true;
-        _whitelist[0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3] = true;
-        _whitelist[0x950B18aa023cEAbaA912924B2fdD69a5C20f11e9] = true;
         _whitelist[0x27f1776c1857990E246a3aed5Ad2643776535f04] = true;
+        _whitelist[0xdeee22a265bd8747ac632f6398fA1edcc70DD772] = true;
+        _whitelist[0x98322244C6dC5bc8445c396E0dC0514DeBF39CDA] = true;
         _whitelist[_excludelpAddress] = true;
     }
 
