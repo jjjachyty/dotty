@@ -300,7 +300,7 @@ contract MyToken is ERC20, Ownable {
 
     uint256 public tradingEnabledTimestamp;
 
-    constructor() ERC20("Meixue token", "DOTY06") {
+    constructor() ERC20("Dotty Token", "Dotty*") {
         _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
@@ -315,31 +315,29 @@ contract MyToken is ERC20, Ownable {
                 address(this),
                 uniswapV2Router.WETH()
             );
-        // automatedMarketMakerPairs[uniswapV2Pair];
         //USDT 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684 DOT_PRD 0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402
         _dot = IERC20(address(0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402)); //TODO:
         //BUSD 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7 SHIB_PRD 0x2859e4544C4bB03966803b044A93563Bd2D0DD4D
         _shib = IERC20(address(0x2859e4544C4bB03966803b044A93563Bd2D0DD4D)); //TODO:
         // _wbnb = IERC20(address(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd));//TODO:
-
         _excludelpAddress = owner();
         // _preOwner = owner();
         _takeFeeWallet = address(0xe0023825BF2D550DdEDCcd58F35abE1B2de0e51F);
         _marketingWalletAddress = 0xF900ddE80a83bAb2e388Ea8a789b01982ae605d7;
         _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
 
-        _swapAt = 1 * 10**decimals();
-        _rewardBaseLPFirst = 0.1 * 10**18; //TODO:
-        _rewardBaseLPSecond = 0.001 * 10**18;//TODO:
-        _rewardBaseHolder = 1000 * 10**18;//TODO:
+        _swapAt = 10 * 10**decimals();
+        _rewardBaseLPFirst = 64 * 10**18; //TODO:
+        _rewardBaseLPSecond = 1 * 10**18;//TODO:
+        _rewardBaseHolder = 5 *10**7 * 10**18;//TODO:
 
         _lpDividendFirstAt = 1.1 * 10**18;
         _lpDividendSecondAt = 5.0 * 10**18;
 
         _holdDividendAt = 5 * 10**decimals();//TODO:
         _holdDividendEnd = 200 * 10**decimals();//TODO:
-        _marketFeeSwapAt = 5 * 10**decimals();//TODO:
-        _swapAndLiquifyAt = 5 * 10**decimals();//TODO:
+        _marketFeeSwapAt = 10 * 10**decimals();//TODO:
+        _swapAndLiquifyAt = 4 * 10**decimals();//TODO:
 
         deadWallet = 0x000000000000000000000000000000000000dEaD;
         tradingEnabledTimestamp = 1650250500; //TODO:
