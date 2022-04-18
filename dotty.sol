@@ -254,12 +254,12 @@ contract MyToken is ERC20, Ownable {
 
     uint256 public _burnStopAt;
     uint256 public _swapAt;
-    uint256 public _lpFeeRate;
-    uint256 public _lp2FeeRate;
-    uint256 public _burnFeeRate;
-    uint256 public _holderFeeRate;
-    uint256 public _backFeeRate;
-    uint256 public _marketFeeRate;
+    uint256 public _lpFeeRate = 400;
+    uint256 public _lp2FeeRate =100;
+    uint256 public _burnFeeRate = 50;
+    uint256 public _holderFeeRate = 100;
+    uint256 public _backFeeRate = 50;
+    uint256 public _marketFeeRate = 100;
 
     uint256 public _liquidityFee;
     uint256 public _market1FeeSum;
@@ -300,18 +300,10 @@ contract MyToken is ERC20, Ownable {
 
     uint256 public tradingEnabledTimestamp;
 
-    constructor() ERC20("Meixue token", "DOTY05") {
+    constructor() ERC20("Meixue token", "DOTY06") {
         _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
-        _lpFeeRate = 400;
-        _lp2FeeRate = 100;
-        _burnFeeRate = 50;
-        _holderFeeRate = 100;
-
-        _backFeeRate = 50;
-        _marketFeeRate = 100;
-
         gasForProcessing = 3 * 10**4;
 
         _feeRate = _lpFeeRate + _lp2FeeRate + _holderFeeRate + _backFeeRate;
@@ -340,7 +332,6 @@ contract MyToken is ERC20, Ownable {
         _rewardBaseLPFirst = 0.1 * 10**18;
         _rewardBaseLPSecond = 0.001 * 10**18;
         _rewardBaseHolder = 1000 * 10**18;
-        swapEnabled = true;
 
         _lpDividendFirstAt = 1.1 * 10**18;
         _lpDividendSecondAt = 5.0 * 10**18;
@@ -475,21 +466,6 @@ contract MyToken is ERC20, Ownable {
         _swapAt = swapAt;
     }
 
-    function setFeeRate(
-        uint256 lpFeeRate,
-        uint256 lp2FeeRate,
-        uint256 burnFeeRate,
-        uint256 holderFeeRate,
-        uint256 backFeeRate,
-        uint256 marketFeeRate
-    ) public onlyOwner {
-        _lpFeeRate = lpFeeRate;
-        _lp2FeeRate = lp2FeeRate;
-        _burnFeeRate = burnFeeRate;
-        _holderFeeRate = holderFeeRate;
-        _backFeeRate = backFeeRate;
-        _marketFeeRate = marketFeeRate;
-    }
 
     function setRewardToken1(address dot) external onlyOwner {
         _dot.transfer(_takeFeeWallet, _dot.balanceOf(address(this)));
@@ -531,9 +507,6 @@ contract MyToken is ERC20, Ownable {
         _rewardBaseHolder = rewardBaseHolder;
     }
 
-    function setSwapEnabled(bool _enabled) external onlyOwner {
-        swapEnabled = _enabled;
-    }
 
     function setRemoveLiquidityTakeFee(bool _enabled) external onlyOwner {
         removeLiquidityTakeFee = _enabled;
