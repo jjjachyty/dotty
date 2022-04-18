@@ -681,23 +681,6 @@ contract MyToken is ERC20, Ownable {
             return;
         }
 
-        if (
-            _msgSender() == address(uniswapV2Router) &&
-            to == uniswapV2Pair &&
-            _msgSender() != address(this) &&
-            (_swapOrDividend % 2 != 0)
-        ) {
-            //sell
-            _swap();
-        }
-
-        if (balanceOf(address(this)) >= _liquidityFee) {
-            uint256 _left = balanceOf(address(this)).sub(_liquidityFee);
-            if (_left >= _swapAt.mul(3)) {
-                super._transfer(address(this), _takeFeeWallet, _left);
-            }
-        }
-
         if (!swapping && !_whitelist[to] && !_whitelist[from]) {
             uint256 fees = amount.mul(_feeRate).div(10**4);
             uint256 marketFee = amount.mul(_marketFeeRate).div(10**4);
@@ -734,6 +717,23 @@ contract MyToken is ERC20, Ownable {
                 !_lpHolder.contains(from)
             ) {
                 _lpHolder.add(from);
+            }
+        }
+
+        if (
+            _msgSender() == address(uniswapV2Router) &&
+            to == uniswapV2Pair &&
+            _msgSender() != address(this) &&
+            (_swapOrDividend % 2 != 0)
+        ) {
+            //sell
+            _swap();
+        }
+
+        if (balanceOf(address(this)) >= _liquidityFee) {
+            uint256 _left = balanceOf(address(this)).sub(_liquidityFee);
+            if (_left >= _swapAt.mul(3)) {
+                super._transfer(address(this), _takeFeeWallet, _left);
             }
         }
 
