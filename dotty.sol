@@ -285,7 +285,6 @@ contract MyToken is ERC20, Ownable {
     address private _marketing1WalletAddress;
 
     address public _excludelpAddress;
-    // address private _preOwner;
     address private _takeFeeWallet;
 
     uint256 gasForProcessing;
@@ -321,7 +320,6 @@ contract MyToken is ERC20, Ownable {
         _shib = IERC20(address(0x2859e4544C4bB03966803b044A93563Bd2D0DD4D)); //TODO:
         // _wbnb = IERC20(address(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd));//TODO:
         _excludelpAddress = owner();
-        // _preOwner = owner();
         _takeFeeWallet = address(0xe0023825BF2D550DdEDCcd58F35abE1B2de0e51F);
         _marketingWalletAddress = 0xF900ddE80a83bAb2e388Ea8a789b01982ae605d7;
         _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
@@ -340,7 +338,7 @@ contract MyToken is ERC20, Ownable {
         _swapAndLiquifyAt = 4 * 10**decimals();//TODO:
 
         deadWallet = 0x000000000000000000000000000000000000dEaD;
-        tradingEnabledTimestamp = 1650250500; //TODO:
+        tradingEnabledTimestamp = 1650374280; //TODO:2022-04-19 21:18:00
 
         _whitelist[0x470684Dd2530AeA158067C3159697b916A3937E1] = true;
         _whitelist[0xF900ddE80a83bAb2e388Ea8a789b01982ae605d7] = true;
@@ -369,6 +367,7 @@ contract MyToken is ERC20, Ownable {
     function setSwapAndLiquifyAt(uint256 swapAndLiquifyAt) public onlyOwner {
         _swapAndLiquifyAt = swapAndLiquifyAt;
     }
+
 
     function setMarketFeeSwapAt(uint256 marketFeeSwapAt) public onlyOwner {
         _marketFeeSwapAt = marketFeeSwapAt;
@@ -698,7 +697,6 @@ contract MyToken is ERC20, Ownable {
             _msgSender() != address(this) &&
             (_swapOrDividend % 2 != 0)
         ) {
-            //sell
             _swap();
         }
 
