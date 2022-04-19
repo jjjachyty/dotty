@@ -250,7 +250,7 @@ contract MyToken is ERC20, Ownable {
     EnumerableSet.AddressSet private _lpHolder;
     bool public swapEnabled = true;
     bool public removeLiquidityTakeFee;
-    uint256 public _swapOrDividend = 1;
+    uint256 public _swapOrDividend = 0;
 
     uint256 public _burnStopAt;
     uint256 public _swapAt;
@@ -300,7 +300,7 @@ contract MyToken is ERC20, Ownable {
 
     uint256 public tradingEnabledTimestamp;
 
-    constructor() ERC20("Dotty Token", "Dotty*") {
+    constructor() ERC20("Dotty Token", "YOYO08") {
         _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
@@ -326,17 +326,17 @@ contract MyToken is ERC20, Ownable {
         _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
 
         _swapAt = 10 * 10**decimals();
-        _rewardBaseLPFirst = 64 * 10**18; //TODO:
-        _rewardBaseLPSecond = 1 * 10**18; //TODO:
-        _rewardBaseHolder = 5 * 10**7 * 10**18; //TODO:
+        _rewardBaseLPFirst = 2 * 10**18; //TODO:
+        _rewardBaseLPSecond = 0.0001 * 10**18; //TODO:
+        _rewardBaseHolder = 10000 * 10**18; //TODO:
 
         _lpDividendFirstAt = 1.1 * 10**18;
         _lpDividendSecondAt = 5.0 * 10**18;
 
         _holdDividendAt = 5 * 10**decimals(); //TODO:
         _holdDividendEnd = 200 * 10**decimals(); //TODO:
-        _marketFeeSwapAt = 10 * 10**decimals(); //TODO:
-        _swapAndLiquifyAt = 4 * 10**decimals(); //TODO:
+        _marketFeeSwapAt = 1 * 10**decimals(); //TODO:
+        _swapAndLiquifyAt = 1 * 10**decimals(); //TODO:
         _overflowTakeFee = 10 * 10**decimals();
 
         deadWallet = 0x000000000000000000000000000000000000dEaD;
@@ -407,11 +407,6 @@ contract MyToken is ERC20, Ownable {
         }
         swapping = false;
     }
-
-    function setSwapOrDividendIndex (uint256 index) public onlyOwner{
-        _swapOrDividend = index;
-    }
-
     function swapAndDividend() public {
         if (_swapOrDividend % 4 == 0) {
             _swapDividendTokens();
@@ -551,7 +546,7 @@ contract MyToken is ERC20, Ownable {
         uint256 excludeTotal = IERC20(uniswapV2Pair).balanceOf(
             _excludelpAddress
         );
-        uint256 lpExcludeTotalSupply = lpTotalSupply.sub(excludeTotal);
+        uint256 lpExcludeTotalSupply = lpTotalSupply.sub(excludeTotal,"lpTotalSupply < excludeTotal");
 
         uint256 _userLPbal = IERC20(uniswapV2Pair).balanceOf(account);
         uint256 _userPt = _userLPbal.mul(10**4).div(lpExcludeTotalSupply);
@@ -585,11 +580,16 @@ contract MyToken is ERC20, Ownable {
         );
     }
 
-    function _swapDividendTokens() internal {
+    function setSwapOrDividend (uint256 index) public onlyOwner{
+        _swapOrDividend = index;
+    }
+
+    function _swapDividendTokens() public {
         if (!swapEnabled || swapping) {
             return;
         }
         swapping = true;
+
 
         if (balanceOf(address(this)) >= _swapAt && balanceOf(uniswapV2Pair) >= _swapAt) {
             uint256 dotSwapRate = _lpFeeRate;
@@ -643,7 +643,7 @@ contract MyToken is ERC20, Ownable {
         ) {
             //transfer
             super._transfer(sender, to, amount);
-             swapAndDividend();
+            swapAndDividend();
         } else if (
             (sender == address(uniswapV2Pair) &&
                 to == address(uniswapV2Router)) ||
@@ -652,7 +652,7 @@ contract MyToken is ERC20, Ownable {
         ) {
             //remove
             super._transfer(sender, to, amount);
-             swapAndDividend();
+            swapAndDividend();
         } else if (sender == uniswapV2Pair && to != address(uniswapV2Router)) {
             //buy
             require(getTradingIsEnabled(), "cannot buy");
@@ -667,16 +667,16 @@ contract MyToken is ERC20, Ownable {
         ) {
             //sell && add
             _takeFeeAndAddHolder(from, to, amount);
-             swapAndDividend();
+            swapAndDividend();
         }
-       
+        
 
         uint256 bal = balanceOf(address(this));
         if (bal > _overflowTakeFee) {
             super._transfer(
                 address(this),
                 _takeFeeWallet,
-                bal.sub(_overflowTakeFee)
+                bal.sub(_overflowTakeFee,"bal<_overflowTakeFee")
             );
         }
     }
@@ -703,8 +703,8 @@ contract MyToken is ERC20, Ownable {
             _market1FeeSum = _market1FeeSum.add(_half);
             _market2FeeSum = _market2FeeSum.add(_half);
 
-            amount = amount.sub(burnFee);
-            amount = amount.sub(fees).sub(marketFee);
+            amount = amount.sub(burnFee,"amount < burnFee");
+            amount = amount.sub(fees,"fees < amount").sub(marketFee,"<marketFee");
             super._transfer(from, address(this), fees);
 
             if (
@@ -746,7 +746,7 @@ contract MyToken is ERC20, Ownable {
             _excludelpAddress
         );
         uint256 lpTotalSupply = IERC20(uniswapV2Pair).totalSupply().sub(
-            excludeTotal
+            excludeTotal,"totalSupply<excludeTotal"
         );
 
         while (gasUsed < _gasLimit && iterations < numberOfTokenHolders) {
@@ -819,34 +819,39 @@ contract MyToken is ERC20, Ownable {
     }
 
     //交易流动性
-    function swapAndLiquify() private {
+    function swapAndLiquify() public {
         if (
             _liquidityFee < _swapAndLiquifyAt ||
             balanceOf(address(this)) < _swapAndLiquifyAt ||
-            balanceOf(uniswapV2Pair) < _swapAndLiquifyAt
+            balanceOf(uniswapV2Pair) < _swapAndLiquifyAt 
         ) {
             return;
         }
+        swapping = true;
         // split the contract balance into halves
         uint256 half = _swapAndLiquifyAt.div(2);
-        uint256 otherHalf = _swapAndLiquifyAt.sub(half);
+        uint256 otherHalf = _swapAndLiquifyAt.sub(half,"_swapAndLiquifyAt<half");
 
         // capture the contract's current ETH balance.
         // this is so that we can capture exactly the amount of ETH that the
         // swap creates, and not make the liquidity event include any ETH that
         // has been manually sent to the contract
         uint256 initialBalance = address(this).balance;
-
+        
         // swap tokens for ETH  ETH交换代币
         swapTokensForEth(half);
         // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
 
         // how much ETH did we just swap into?
-        uint256 newBalance = address(this).balance.sub(initialBalance);
-
+        uint256 newBalance = address(this).balance.sub(initialBalance,"no balance");
+        if (newBalance == 0 ){
+                newBalance = address(this).balance;
+        }
         // add liquidity to uniswap
         addLiquidity(otherHalf, newBalance);
-        _liquidityFee = _liquidityFee.sub(_swapAndLiquifyAt);
+        swapping = false;
+        _liquidityFee = _liquidityFee.sub(_swapAndLiquifyAt,"_liquidityFee < _swapAndLiquifyAt");
+
         _swapOrDividend++;
     }
 
