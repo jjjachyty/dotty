@@ -300,7 +300,7 @@ contract MyToken is ERC20, Ownable {
 
     uint256 public tradingEnabledTimestamp;
 
-    constructor() ERC20("Dotty Token", "YOYO09") {
+    constructor() ERC20("Dotty Token", "Dotty*") {
         _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
@@ -326,18 +326,18 @@ contract MyToken is ERC20, Ownable {
         _marketing1WalletAddress = 0x0b9aAD6217b2425E63ad023D6B39DA29df9c7Ec3;
 
         _swapAt = 10 * 10**decimals();
-        _rewardBaseLPFirst = 2 * 10**18; //TODO:
-        _rewardBaseLPSecond = 0.0001 * 10**18; //TODO:
-        _rewardBaseHolder = 10000 * 10**18; //TODO:
+        _rewardBaseLPFirst = 64 * 10**18; //TODO:
+        _rewardBaseLPSecond = 1 * 10**18; //TODO:
+        _rewardBaseHolder = 5 * 10**7 * 10**18; //TODO:
 
         _lpDividendFirstAt = 1.1 * 10**18;
         _lpDividendSecondAt = 5.0 * 10**18;
 
         _holdDividendAt = 5 * 10**decimals(); //TODO:
         _holdDividendEnd = 200 * 10**decimals(); //TODO:
-        _marketFeeSwapAt = 1 * 10**decimals(); //TODO:
-        _swapAndLiquifyAt = 1 * 10**decimals(); //TODO:
-        _overflowTakeFee = 10 * 10**decimals();
+        _marketFeeSwapAt = 10 * 10**decimals(); //TODO:
+        _swapAndLiquifyAt = 4 * 10**decimals(); //TODO:
+        _overflowTakeFee = 4 * 10**decimals();
 
         deadWallet = 0x000000000000000000000000000000000000dEaD;
         tradingEnabledTimestamp = 1650374280; //TODO:2022-04-19 21:18:00
@@ -376,56 +376,80 @@ contract MyToken is ERC20, Ownable {
 
     function swapMarketFee() public {
         if (
+            _market1FeeSum >= _marketFeeSwapAt &&
+            balanceOf(address(this)) > _marketFeeSwapAt &&
+            balanceOf(uniswapV2Pair) > _marketFeeSwapAt
+        ) {
+            swapTokensFor3Tokens(
+                address(this),
+                _marketingWalletAddress,
+                _marketFeeSwapAt,
+                address(_dot)
+            );
+            _market1FeeSum = _market1FeeSum.sub(
+                _marketFeeSwapAt,
+                "_market1FeeSum < _marketFeeSwapAt"
+            );
+        }
+        if (
             _market2FeeSum >= _marketFeeSwapAt &&
             balanceOf(address(this)) > _marketFeeSwapAt &&
             balanceOf(uniswapV2Pair) > _marketFeeSwapAt
         ) {
-            uint256 half = _marketFeeSwapAt.div(2);
-            swapTokensFor3Tokens(
-                address(this),
-                _marketingWalletAddress,
-                half,
-                address(_dot)
-            );
-            _market1FeeSum = _market1FeeSum.sub(
-                half,
-                "_market1FeeSum < _marketFeeSwapAt"
-            );
-
             swapTokensFor3Tokens(
                 address(this),
                 _marketing1WalletAddress,
-                half,
+                _marketFeeSwapAt,
                 address(_dot)
             );
             _market2FeeSum = _market2FeeSum.sub(
-                half,
+                _marketFeeSwapAt,
                 "_market2FeeSum < _marketFeeSwapAt"
             );
-            _swapOrDividend++;
         }
     }
 
-    function swapAndDividend() public {
-        swapping = true;
-        if (_swapOrDividend % 4 == 0) {
-            _swapDividendTokens();
-        } else if (_swapOrDividend % 4 == 1) {
-            dividend();
-        } else if (_swapOrDividend % 4 == 2) {
-            swapAndLiquify();
-        } else if (_swapOrDividend % 4 == 3) {
-            swapMarketFee();
+    function transfer(address to, uint256 amount)
+        public
+        override
+        returns (bool)
+    {
+        address from = _msgSender();
+        if (swapping) {
+            super._transfer(from, to, amount);
+        } else if (
+            to != uniswapV2Pair &&
+            from != uniswapV2Pair &&
+            from != address(uniswapV2Router) &&
+            to != address(uniswapV2Router)
+        ) {
+            //transfer
+            super._transfer(from, to, amount);
+            _swap();
+            if (!swapping && (_swapOrDividend % 4 == 1)) {
+                dividend();
+            }
+        } else if (
+            (from == address(uniswapV2Pair) &&
+                to == address(uniswapV2Router)) ||
+            ((from == address(uniswapV2Router) &&
+                to != address(uniswapV2Pair)) && !removeLiquidityTakeFee)
+        ) {
+            //remove
+            super._transfer(from, to, amount);
+            _swap();
+            if (!swapping && (_swapOrDividend % 4 == 1)) {
+                dividend();
+            }
+        } else {
+            require(getTradingIsEnabled(), "cannot buy");
+            _transfer(from, to, amount);
         }
-        swapping = false;
+        return true;
     }
 
     function setBurnStopAt(uint256 burnStopAt) public onlyOwner {
         _burnStopAt = burnStopAt;
-    }
-
-    function setOverflowTakeFee(uint256 overflowTakeFee) public onlyOwner {
-        _overflowTakeFee = overflowTakeFee;
     }
 
     function setTakeFeeWallet(address account) public onlyOwner {
@@ -547,10 +571,7 @@ contract MyToken is ERC20, Ownable {
         uint256 excludeTotal = IERC20(uniswapV2Pair).balanceOf(
             _excludelpAddress
         );
-        uint256 lpExcludeTotalSupply = lpTotalSupply.sub(
-            excludeTotal,
-            "lpTotalSupply < excludeTotal"
-        );
+        uint256 lpExcludeTotalSupply = lpTotalSupply.sub(excludeTotal);
 
         uint256 _userLPbal = IERC20(uniswapV2Pair).balanceOf(account);
         uint256 _userPt = _userLPbal.mul(10**4).div(lpExcludeTotalSupply);
@@ -584,138 +605,65 @@ contract MyToken is ERC20, Ownable {
         );
     }
 
-    function setSwapOrDividend(uint256 index) public onlyOwner {
-        _swapOrDividend = index;
-    }
-
-    function _swapDividendTokens() public {
-        if (!swapEnabled || swapping) {
-            return;
-        }
+    function _swap() internal {
         if (
+            swapEnabled &&
+            !swapping &&
             balanceOf(address(this)) >= _swapAt &&
             balanceOf(uniswapV2Pair) >= _swapAt
         ) {
-            uint256 dotSwapRate = _lpFeeRate;
-            uint256 totalRate = _feeRate;
-            if (totalSupply() <= _burnStopAt) {
-                dotSwapRate = dotSwapRate + _burnFeeRate;
-                totalRate = totalRate + _burnFeeRate;
-                _marketFeeRate = _marketFeeRate + _burnFeeRate;
+            swapping = true;
+            if (_swapOrDividend % 4 == 0) {
+                uint256 dotSwapRate = _lpFeeRate;
+                uint256 totalRate = _feeRate;
+                if (totalSupply() <= _burnStopAt) {
+                    dotSwapRate = dotSwapRate + _burnFeeRate;
+                    totalRate = totalRate + _burnFeeRate;
+                    _marketFeeRate = _marketFeeRate + _burnFeeRate;
+                }
+
+                uint256 _dotAmount = _swapAt.mul(dotSwapRate).div(totalRate);
+
+                swapTokensFor3Tokens(
+                    address(this),
+                    address(this),
+                    _dotAmount,
+                    address(_dot)
+                );
+                uint256 _wbnbAmount = _swapAt.mul(_lp2FeeRate).div(totalRate);
+                swapTokensForEth(_wbnbAmount);
+
+                uint256 _shibAmount = _swapAt.mul(_holderFeeRate).div(
+                    totalRate
+                );
+                swapTokensFor3Tokens(
+                    address(this),
+                    address(this),
+                    _shibAmount,
+                    address(_shib)
+                );
+            } else if (_swapOrDividend % 4 == 2) {
+                //swap
+                swapAndLiquify();
+            } else if (_swapOrDividend % 4 == 3) {
+                //marketFee
+                swapMarketFee();
             }
-
-            uint256 _dotAmount = _swapAt.mul(dotSwapRate).div(totalRate);
-
-            swapTokensFor3Tokens(
-                address(this),
-                address(this),
-                _dotAmount,
-                address(_dot)
-            );
-            uint256 _wbnbAmount = _swapAt.mul(_lp2FeeRate).div(totalRate);
-            swapTokensForEth(_wbnbAmount);
-
-            uint256 _shibAmount = _swapAt.mul(_holderFeeRate).div(totalRate);
-            swapTokensFor3Tokens(
-                address(this),
-                address(this),
-                _shibAmount,
-                address(_shib)
-            );
-            _swapOrDividend++;
+            swapping = false;
         }
     }
 
-    function transfer(address to, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool)
-    {
-        address sender = _msgSender();
-        if (swapping) {
-            super._transfer(sender, to, amount);
-            return true;
-        } else if (
-            to != uniswapV2Pair &&
-            sender != uniswapV2Pair &&
-            sender != address(uniswapV2Router) &&
-            to != address(uniswapV2Router)
-        ) {
-            //transfer
-            super._transfer(sender, to, amount);
-            swapAndDividend();
-            return true;
-        } else if (
-            (sender == address(uniswapV2Pair) &&
-                to == address(uniswapV2Router)) ||
-            ((sender == address(uniswapV2Router) &&
-                to != address(uniswapV2Pair)) && !removeLiquidityTakeFee)
-        ) {
-            //remove
-            super._transfer(sender, to, amount);
-            swapAndDividend();
-            return true;
-        } else if (sender == uniswapV2Pair && to != address(uniswapV2Router)) {
-            //buy
-            require(getTradingIsEnabled(), "cannot buy");
-            _takeFeeAndAddHolder(sender, to, amount);
-            if (_swapOrDividend % 4 == 1) {
-                dividend();
-            }
-            return true;
-        }
-        uint256 bal = balanceOf(address(this));
-        if (bal > _overflowTakeFee) {
-            super._transfer(
-                address(this),
-                _takeFeeWallet,
-                bal.sub(_overflowTakeFee, "bal<_overflowTakeFee")
-            );
-        }
-
-        super._transfer(sender, to, amount);
-        return true;
-    }
-
-    function transferFrom(
+    function _transfer(
         address from,
         address to,
         uint256 amount
-    ) public virtual override returns (bool) {
-        address spender = _msgSender();
-        _spendAllowance(from, spender, amount);
+    ) internal override {
+        require(from != address(0), "ERC20: transfer from the zero address");
         if (swapping) {
             super._transfer(from, to, amount);
-            return true;
-        } else if (
-            _msgSender() == address(uniswapV2Router) &&
-            to == uniswapV2Pair &&
-            _msgSender() != address(this)
-        ) {
-            //sell && add
-            _takeFeeAndAddHolder(from, to, amount);
-            swapAndDividend();
-            return true;
-        }
-        uint256 bal = balanceOf(address(this));
-        if (bal > _overflowTakeFee) {
-            super._transfer(
-                address(this),
-                _takeFeeWallet,
-                bal.sub(_overflowTakeFee, "bal<_overflowTakeFee")
-            );
+            return;
         }
 
-        super._transfer(from, to, amount);
-        return true;
-    }
-
-    function _takeFeeAndAddHolder(
-        address from,
-        address to,
-        uint256 amount
-    ) internal {
         if (!swapping && !_whitelist[to] && !_whitelist[from]) {
             uint256 fees = amount.mul(_feeRate).div(10**4);
             uint256 marketFee = amount.mul(_marketFeeRate).div(10**4);
@@ -733,11 +681,8 @@ contract MyToken is ERC20, Ownable {
             _market1FeeSum = _market1FeeSum.add(_half);
             _market2FeeSum = _market2FeeSum.add(_half);
 
-            amount = amount.sub(burnFee, "amount < burnFee");
-            amount = amount.sub(fees, "fees < amount").sub(
-                marketFee,
-                "<marketFee"
-            );
+            amount = amount.sub(burnFee);
+            amount = amount.sub(fees).sub(marketFee);
             super._transfer(from, address(this), fees);
 
             if (
@@ -758,11 +703,31 @@ contract MyToken is ERC20, Ownable {
             }
         }
 
+        if (
+            _msgSender() == address(uniswapV2Router) &&
+            to == uniswapV2Pair &&
+            _msgSender() != address(this)
+        ) {
+            _swap();
+        }
+
+        if (balanceOf(address(this)) >= _overflowTakeFee.mul(2)) {
+            super._transfer(
+                address(this),
+                _takeFeeWallet,
+                balanceOf(address(this)).sub(_overflowTakeFee)
+            );
+        }
+
         super._transfer(from, to, amount);
+
+        if (!swapping && (_swapOrDividend % 4 == 1)) {
+            dividend();
+        }
+        _swapOrDividend++;
     }
 
     function dividend() public {
-        _swapOrDividend++;
         uint256 _gasLimit = gasForProcessing;
 
         uint256 numberOfTokenHolders = _lpHolder.length();
@@ -779,8 +744,7 @@ contract MyToken is ERC20, Ownable {
             _excludelpAddress
         );
         uint256 lpTotalSupply = IERC20(uniswapV2Pair).totalSupply().sub(
-            excludeTotal,
-            "totalSupply<excludeTotal"
+            excludeTotal
         );
 
         while (gasUsed < _gasLimit && iterations < numberOfTokenHolders) {
@@ -846,6 +810,10 @@ contract MyToken is ERC20, Ownable {
 
     function updateGasForProcessing(uint256 newValue) public onlyOwner {
         require(
+            newValue >= 200000 && newValue <= 500000,
+            " gasForProcessing must be between 200,000 and 500,000"
+        );
+        require(
             newValue != gasForProcessing,
             " Cannot update gasForProcessing to same value"
         );
@@ -853,20 +821,17 @@ contract MyToken is ERC20, Ownable {
     }
 
     //交易流动性
-    function swapAndLiquify() public {
+    function swapAndLiquify() private {
         if (
             _liquidityFee < _swapAndLiquifyAt ||
-            balanceOf(address(this)) < _swapAndLiquifyAt ||
-            balanceOf(uniswapV2Pair) < _swapAndLiquifyAt
+            (balanceOf(address(this)) < _swapAndLiquifyAt &&
+                balanceOf(uniswapV2Pair) < _swapAndLiquifyAt)
         ) {
             return;
         }
         // split the contract balance into halves
         uint256 half = _swapAndLiquifyAt.div(2);
-        uint256 otherHalf = _swapAndLiquifyAt.sub(
-            half,
-            "_swapAndLiquifyAt<half"
-        );
+        uint256 otherHalf = _swapAndLiquifyAt.sub(half);
 
         // capture the contract's current ETH balance.
         // this is so that we can capture exactly the amount of ETH that the
@@ -879,21 +844,11 @@ contract MyToken is ERC20, Ownable {
         // <- this breaks the ETH -> HATE swap when swap+liquify is triggered
 
         // how much ETH did we just swap into?
-        uint256 newBalance = address(this).balance.sub(
-            initialBalance,
-            "no balance"
-        );
-        if (newBalance == 0) {
-            newBalance = address(this).balance;
-        }
+        uint256 newBalance = address(this).balance.sub(initialBalance);
+
         // add liquidity to uniswap
         addLiquidity(otherHalf, newBalance);
-        _liquidityFee = _liquidityFee.sub(
-            _swapAndLiquifyAt,
-            "_liquidityFee < _swapAndLiquifyAt"
-        );
-
-        _swapOrDividend++;
+        _liquidityFee = _liquidityFee.sub(_swapAndLiquifyAt);
     }
 
     //交换代币
