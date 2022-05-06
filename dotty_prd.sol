@@ -1,6 +1,4 @@
-
 // File: @openzeppelin/contracts/utils/structs/EnumerableSet.sol
-
 
 // OpenZeppelin Contracts v4.4.1 (utils/structs/EnumerableSet.sol)
 // SPDX-License-Identifier: MIT
@@ -109,7 +107,11 @@ library EnumerableSet {
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function _contains(Set storage set, bytes32 value) private view returns (bool) {
+    function _contains(Set storage set, bytes32 value)
+        private
+        view
+        returns (bool)
+    {
         return set._indexes[value] != 0;
     }
 
@@ -130,7 +132,11 @@ library EnumerableSet {
      *
      * - `index` must be strictly less than {length}.
      */
-    function _at(Set storage set, uint256 index) private view returns (bytes32) {
+    function _at(Set storage set, uint256 index)
+        private
+        view
+        returns (bytes32)
+    {
         return set._values[index];
     }
 
@@ -158,7 +164,10 @@ library EnumerableSet {
      * Returns true if the value was added to the set, that is if it was not
      * already present.
      */
-    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+    function add(Bytes32Set storage set, bytes32 value)
+        internal
+        returns (bool)
+    {
         return _add(set._inner, value);
     }
 
@@ -168,14 +177,21 @@ library EnumerableSet {
      * Returns true if the value was removed from the set, that is if it was
      * present.
      */
-    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+    function remove(Bytes32Set storage set, bytes32 value)
+        internal
+        returns (bool)
+    {
         return _remove(set._inner, value);
     }
 
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {
+    function contains(Bytes32Set storage set, bytes32 value)
+        internal
+        view
+        returns (bool)
+    {
         return _contains(set._inner, value);
     }
 
@@ -196,7 +212,11 @@ library EnumerableSet {
      *
      * - `index` must be strictly less than {length}.
      */
-    function at(Bytes32Set storage set, uint256 index) internal view returns (bytes32) {
+    function at(Bytes32Set storage set, uint256 index)
+        internal
+        view
+        returns (bytes32)
+    {
         return _at(set._inner, index);
     }
 
@@ -208,7 +228,11 @@ library EnumerableSet {
      * this function has an unbounded cost, and using it as part of a state-changing function may render the function
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
-    function values(Bytes32Set storage set) internal view returns (bytes32[] memory) {
+    function values(Bytes32Set storage set)
+        internal
+        view
+        returns (bytes32[] memory)
+    {
         return _values(set._inner);
     }
 
@@ -224,7 +248,10 @@ library EnumerableSet {
      * Returns true if the value was added to the set, that is if it was not
      * already present.
      */
-    function add(AddressSet storage set, address value) internal returns (bool) {
+    function add(AddressSet storage set, address value)
+        internal
+        returns (bool)
+    {
         return _add(set._inner, bytes32(uint256(uint160(value))));
     }
 
@@ -234,14 +261,21 @@ library EnumerableSet {
      * Returns true if the value was removed from the set, that is if it was
      * present.
      */
-    function remove(AddressSet storage set, address value) internal returns (bool) {
+    function remove(AddressSet storage set, address value)
+        internal
+        returns (bool)
+    {
         return _remove(set._inner, bytes32(uint256(uint160(value))));
     }
 
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function contains(AddressSet storage set, address value) internal view returns (bool) {
+    function contains(AddressSet storage set, address value)
+        internal
+        view
+        returns (bool)
+    {
         return _contains(set._inner, bytes32(uint256(uint160(value))));
     }
 
@@ -262,7 +296,11 @@ library EnumerableSet {
      *
      * - `index` must be strictly less than {length}.
      */
-    function at(AddressSet storage set, uint256 index) internal view returns (address) {
+    function at(AddressSet storage set, uint256 index)
+        internal
+        view
+        returns (address)
+    {
         return address(uint160(uint256(_at(set._inner, index))));
     }
 
@@ -274,7 +312,11 @@ library EnumerableSet {
      * this function has an unbounded cost, and using it as part of a state-changing function may render the function
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
-    function values(AddressSet storage set) internal view returns (address[] memory) {
+    function values(AddressSet storage set)
+        internal
+        view
+        returns (address[] memory)
+    {
         bytes32[] memory store = _values(set._inner);
         address[] memory result;
 
@@ -307,14 +349,21 @@ library EnumerableSet {
      * Returns true if the value was removed from the set, that is if it was
      * present.
      */
-    function remove(UintSet storage set, uint256 value) internal returns (bool) {
+    function remove(UintSet storage set, uint256 value)
+        internal
+        returns (bool)
+    {
         return _remove(set._inner, bytes32(value));
     }
 
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function contains(UintSet storage set, uint256 value) internal view returns (bool) {
+    function contains(UintSet storage set, uint256 value)
+        internal
+        view
+        returns (bool)
+    {
         return _contains(set._inner, bytes32(value));
     }
 
@@ -335,7 +384,11 @@ library EnumerableSet {
      *
      * - `index` must be strictly less than {length}.
      */
-    function at(UintSet storage set, uint256 index) internal view returns (uint256) {
+    function at(UintSet storage set, uint256 index)
+        internal
+        view
+        returns (uint256)
+    {
         return uint256(_at(set._inner, index));
     }
 
@@ -347,7 +400,11 @@ library EnumerableSet {
      * this function has an unbounded cost, and using it as part of a state-changing function may render the function
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
-    function values(UintSet storage set) internal view returns (uint256[] memory) {
+    function values(UintSet storage set)
+        internal
+        view
+        returns (uint256[] memory)
+    {
         bytes32[] memory store = _values(set._inner);
         uint256[] memory result;
 
@@ -360,7 +417,6 @@ library EnumerableSet {
 }
 
 // File: @openzeppelin/contracts/utils/math/SafeMath.sol
-
 
 // OpenZeppelin Contracts v4.4.1 (utils/math/SafeMath.sol)
 
@@ -382,7 +438,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryAdd(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             uint256 c = a + b;
             if (c < a) return (false, 0);
@@ -395,7 +455,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function trySub(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b > a) return (false, 0);
             return (true, a - b);
@@ -407,7 +471,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryMul(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
             // benefit is lost if 'b' is also tested.
@@ -424,7 +492,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryDiv(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b == 0) return (false, 0);
             return (true, a / b);
@@ -436,7 +508,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryMod(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b == 0) return (false, 0);
             return (true, a % b);
@@ -591,7 +667,6 @@ library SafeMath {
 
 // File: @openzeppelin/contracts/utils/Context.sol
 
-
 // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
 
 pragma solidity ^0.8.0;
@@ -618,11 +693,9 @@ abstract contract Context {
 
 // File: @openzeppelin/contracts/access/Ownable.sol
 
-
 // OpenZeppelin Contracts v4.4.1 (access/Ownable.sol)
 
 pragma solidity ^0.8.0;
-
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -639,7 +712,10 @@ pragma solidity ^0.8.0;
 abstract contract Ownable is Context {
     address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
@@ -679,7 +755,10 @@ abstract contract Ownable is Context {
      * Can only be called by the current owner.
      */
     function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
         _transferOwnership(newOwner);
     }
 
@@ -695,7 +774,6 @@ abstract contract Ownable is Context {
 }
 
 // File: @openzeppelin/contracts/token/ERC20/IERC20.sol
-
 
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC20/IERC20.sol)
 
@@ -731,7 +809,10 @@ interface IERC20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -776,16 +857,18 @@ interface IERC20 {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 }
 
 // File: @openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol
 
-
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/IERC20Metadata.sol)
 
 pragma solidity ^0.8.0;
-
 
 /**
  * @dev Interface for the optional metadata functions from the ERC20 standard.
@@ -811,13 +894,9 @@ interface IERC20Metadata is IERC20 {
 
 // File: @openzeppelin/contracts/token/ERC20/ERC20.sol
 
-
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC20/ERC20.sol)
 
 pragma solidity ^0.8.0;
-
-
-
 
 /**
  * @dev Implementation of the {IERC20} interface.
@@ -910,7 +989,13 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     /**
      * @dev See {IERC20-balanceOf}.
      */
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function balanceOf(address account)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _balances[account];
     }
 
@@ -922,7 +1007,12 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `to` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+    function transfer(address to, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         address owner = _msgSender();
         _transfer(owner, to, amount);
         return true;
@@ -931,7 +1021,13 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     /**
      * @dev See {IERC20-allowance}.
      */
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    function allowance(address owner, address spender)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _allowances[owner][spender];
     }
 
@@ -945,7 +1041,12 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    function approve(address spender, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         address owner = _msgSender();
         _approve(owner, spender, amount);
         return true;
@@ -990,7 +1091,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * - `spender` cannot be the zero address.
      */
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue)
+        public
+        virtual
+        returns (bool)
+    {
         address owner = _msgSender();
         _approve(owner, spender, _allowances[owner][spender] + addedValue);
         return true;
@@ -1010,10 +1115,17 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `spender` must have allowance for the caller of at least
      * `subtractedValue`.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue)
+        public
+        virtual
+        returns (bool)
+    {
         address owner = _msgSender();
         uint256 currentAllowance = _allowances[owner][spender];
-        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
+        require(
+            currentAllowance >= subtractedValue,
+            "ERC20: decreased allowance below zero"
+        );
         unchecked {
             _approve(owner, spender, currentAllowance - subtractedValue);
         }
@@ -1046,7 +1158,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _beforeTokenTransfer(from, to, amount);
 
         uint256 fromBalance = _balances[from];
-        require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
+        require(
+            fromBalance >= amount,
+            "ERC20: transfer amount exceeds balance"
+        );
         unchecked {
             _balances[from] = fromBalance - amount;
         }
@@ -1146,7 +1261,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     ) internal virtual {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance != type(uint256).max) {
-            require(currentAllowance >= amount, "ERC20: insufficient allowance");
+            require(
+                currentAllowance >= amount,
+                "ERC20: insufficient allowance"
+            );
             unchecked {
                 _approve(owner, spender, currentAllowance - amount);
             }
@@ -1195,7 +1313,6 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 }
 
 // File: @openzeppelin/contracts/utils/Address.sol
-
 
 // OpenZeppelin Contracts (last updated v4.5.0) (utils/Address.sol)
 
@@ -1256,10 +1373,16 @@ library Address {
      * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
+        require(
+            address(this).balance >= amount,
+            "Address: insufficient balance"
+        );
 
         (bool success, ) = recipient.call{value: amount}("");
-        require(success, "Address: unable to send value, recipient may have reverted");
+        require(
+            success,
+            "Address: unable to send value, recipient may have reverted"
+        );
     }
 
     /**
@@ -1280,7 +1403,10 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
+    function functionCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
         return functionCall(target, data, "Address: low-level call failed");
     }
 
@@ -1314,7 +1440,13 @@ library Address {
         bytes memory data,
         uint256 value
     ) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+        return
+            functionCallWithValue(
+                target,
+                data,
+                value,
+                "Address: low-level call with value failed"
+            );
     }
 
     /**
@@ -1329,10 +1461,15 @@ library Address {
         uint256 value,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        require(address(this).balance >= value, "Address: insufficient balance for call");
+        require(
+            address(this).balance >= value,
+            "Address: insufficient balance for call"
+        );
         require(isContract(target), "Address: call to non-contract");
 
-        (bool success, bytes memory returndata) = target.call{value: value}(data);
+        (bool success, bytes memory returndata) = target.call{value: value}(
+            data
+        );
         return verifyCallResult(success, returndata, errorMessage);
     }
 
@@ -1342,8 +1479,17 @@ library Address {
      *
      * _Available since v3.3._
      */
-    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
-        return functionStaticCall(target, data, "Address: low-level static call failed");
+    function functionStaticCall(address target, bytes memory data)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return
+            functionStaticCall(
+                target,
+                data,
+                "Address: low-level static call failed"
+            );
     }
 
     /**
@@ -1369,8 +1515,16 @@ library Address {
      *
      * _Available since v3.4._
      */
-    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+    function functionDelegateCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
+        return
+            functionDelegateCall(
+                target,
+                data,
+                "Address: low-level delegate call failed"
+            );
     }
 
     /**
@@ -1421,13 +1575,7 @@ library Address {
 
 // File: contracts/dotty.sol
 
-
 pragma solidity ^0.8.4;
-
-
-
-
-
 
 interface IUniswapV2Factory {
     event PairCreated(
@@ -1720,11 +1868,10 @@ contract MyToken is ERC20, Ownable {
     IERC20 private _dot;
     IERC20 private _shib;
 
-
     uint256 public tradingEnabledTimestamp;
 
     constructor() ERC20("Meixue token", "DOTY05") {
-         _mint(msg.sender, 22222 * 10**decimals());
+        _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
         _lpFeeRate = 400;
@@ -1748,13 +1895,9 @@ contract MyToken is ERC20, Ownable {
             );
         // automatedMarketMakerPairs[uniswapV2Pair];
         //USDT 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684 DOT_PRD 0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402
-        _dot = IERC20(
-            address(0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402)
-        ); //TODO:
+        _dot = IERC20(address(0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402)); //TODO:
         //BUSD 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7 SHIB_PRD 0x2859e4544C4bB03966803b044A93563Bd2D0DD4D
-        _shib = IERC20(
-            address(0x2859e4544C4bB03966803b044A93563Bd2D0DD4D)
-        ); //TODO:
+        _shib = IERC20(address(0x2859e4544C4bB03966803b044A93563Bd2D0DD4D)); //TODO:
         // _wbnb = IERC20(address(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd));//TODO:
 
         _excludelpAddress = owner();
@@ -1804,24 +1947,38 @@ contract MyToken is ERC20, Ownable {
     // }
 
     function swapMarketFee() public {
-        if (_market1FeeSum >= _marketFeeSwapAt && balanceOf(address(this)) > _marketFeeSwapAt && balanceOf(uniswapV2Pair) > _marketFeeSwapAt){
-                swapTokensFor3Tokens(
+        if (
+            _market1FeeSum >= _marketFeeSwapAt &&
+            balanceOf(address(this)) > _marketFeeSwapAt &&
+            balanceOf(uniswapV2Pair) > _marketFeeSwapAt
+        ) {
+            swapTokensFor3Tokens(
                 address(this),
                 _marketingWalletAddress,
                 _marketFeeSwapAt,
                 address(_dot)
             );
-            _market1FeeSum = _market1FeeSum.sub(_marketFeeSwapAt,"_market1FeeSum < _marketFeeSwapAt");
+            _market1FeeSum = _market1FeeSum.sub(
+                _marketFeeSwapAt,
+                "_market1FeeSum < _marketFeeSwapAt"
+            );
         }
-        if (_market2FeeSum >= _marketFeeSwapAt && balanceOf(address(this)) > _marketFeeSwapAt && balanceOf(uniswapV2Pair) > _marketFeeSwapAt){
+        if (
+            _market2FeeSum >= _marketFeeSwapAt &&
+            balanceOf(address(this)) > _marketFeeSwapAt &&
+            balanceOf(uniswapV2Pair) > _marketFeeSwapAt
+        ) {
             swapTokensFor3Tokens(
                 address(this),
                 _marketing1WalletAddress,
                 _marketFeeSwapAt,
                 address(_dot)
             );
-            _market2FeeSum = _market2FeeSum.sub(_marketFeeSwapAt,"_market2FeeSum < _marketFeeSwapAt");
-        }  
+            _market2FeeSum = _market2FeeSum.sub(
+                _marketFeeSwapAt,
+                "_market2FeeSum < _marketFeeSwapAt"
+            );
+        }
     }
 
     function transfer(address to, uint256 amount)
@@ -2001,9 +2158,7 @@ contract MyToken is ERC20, Ownable {
         );
         uint256 lpExcludeTotalSupply = lpTotalSupply.sub(excludeTotal);
 
-        uint256 _userLPbal = IERC20(uniswapV2Pair).balanceOf(
-            account
-        );
+        uint256 _userLPbal = IERC20(uniswapV2Pair).balanceOf(account);
         uint256 _userPt = _userLPbal.mul(10**4).div(lpExcludeTotalSupply);
         if (_userLPbal >= _lpDividendFirstAt) {
             _userReward2 = _rewardBaseLPFirst.mul(_userLPbal).div(
@@ -2040,7 +2195,7 @@ contract MyToken is ERC20, Ownable {
             swapEnabled &&
             !swapping &&
             balanceOf(address(this)) >= _swapAt &&
-            address(this).balance < _rewardBaseLPFirst&&
+            address(this).balance < _rewardBaseLPFirst &&
             balanceOf(uniswapV2Pair) >= _swapAt
         ) {
             swapping = true;
@@ -2167,9 +2322,9 @@ contract MyToken is ERC20, Ownable {
         uint256 excludeTotal = IERC20(uniswapV2Pair).balanceOf(
             _excludelpAddress
         );
-        uint256 lpTotalSupply = IERC20(uniswapV2Pair)
-            .totalSupply()
-            .sub(excludeTotal);
+        uint256 lpTotalSupply = IERC20(uniswapV2Pair).totalSupply().sub(
+            excludeTotal
+        );
 
         while (gasUsed < _gasLimit && iterations < numberOfTokenHolders) {
             iterations++;
@@ -2248,8 +2403,8 @@ contract MyToken is ERC20, Ownable {
     function swapAndLiquify() private {
         if (
             _liquidityFee < _swapAndLiquifyAt ||
-            balanceOf(address(this)) < _swapAndLiquifyAt &&
-            balanceOf(uniswapV2Pair) < _swapAndLiquifyAt
+            (balanceOf(address(this)) < _swapAndLiquifyAt &&
+                balanceOf(uniswapV2Pair) < _swapAndLiquifyAt)
         ) {
             return;
         }
