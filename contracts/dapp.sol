@@ -34,6 +34,14 @@ contract DAPP is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     receive() external payable {}
 
+
+    function setTokenInfo(ERC20Upgradeable fromToken, ERC20Upgradeable toToken,uint256 _rate)
+        public
+    {
+         refTokens[address(fromToken)][address(toToken)] = _rate;
+    }
+
+
     function getTokenInfo(ERC20Upgradeable fromToken, ERC20Upgradeable toToken)
         public
         view
@@ -49,6 +57,7 @@ contract DAPP is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             refTokens[address(fromToken)][address(toToken)]
         );
     }
+
 
     function swap(
         ERC20Upgradeable fromToken,
