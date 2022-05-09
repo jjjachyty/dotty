@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -34,13 +34,13 @@ contract DAPP is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     receive() external payable {}
 
-
-    function setTokenInfo(ERC20Upgradeable fromToken, ERC20Upgradeable toToken,uint256 _rate)
-        public
-    {
-         refTokens[address(fromToken)][address(toToken)] = _rate;
+    function setTokenInfo(
+        ERC20Upgradeable fromToken,
+        ERC20Upgradeable toToken,
+        uint256 _rate
+    ) public {
+        refTokens[address(fromToken)][address(toToken)] = _rate;
     }
-
 
     function getTokenInfo(ERC20Upgradeable fromToken, ERC20Upgradeable toToken)
         public
@@ -58,7 +58,6 @@ contract DAPP is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         );
     }
 
-
     function swap(
         ERC20Upgradeable fromToken,
         ERC20Upgradeable toToken,
@@ -66,10 +65,19 @@ contract DAPP is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     ) public {
         address sender = _msgSender();
         uint256 _rate = refTokens[address(fromToken)][address(toToken)];
-        require(_rate > 0, "no token relation");
+        uint256 _reverseRate = refTokens[address(toToken)][address(fromToken)];
+
+        require(_rate > 0 || _reverseRate > 0, "no token relation");
         uint256 _bal = fromToken.balanceOf(sender);
         require(_bal >= amount, "no balance");
-        uint256 toAmount = amount.mul(_rate).div(10**4);
+
+        uint256 toAmount;
+
+        if (_rate > 0) {
+            toAmount = amount.mul(_rate).div(10**4);
+        } else if (_reverseRate > 0) {
+            toAmount = amount.div(_rate).div(10**4);
+        }
 
         fromToken.transferFrom(sender, address(this), amount);
         toToken.transfer(sender, toAmount);
