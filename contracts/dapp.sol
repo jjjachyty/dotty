@@ -34,6 +34,13 @@ contract DAPP is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     receive() external payable {}
 
+    function getBalance() public returns (uint256, uint256) {
+        return (
+            token0.balanceOf(address(this)),
+            token1.balanceOf(address(this))
+        );
+    }
+
     function setTokenInfo(
         ERC20Upgradeable fromToken,
         ERC20Upgradeable toToken,
