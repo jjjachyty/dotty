@@ -1869,7 +1869,7 @@ contract DOTTYFIST is ERC20, Ownable {
 
     uint256 public tradingEnabledTimestamp;
 
-    constructor() ERC20("DOTTYFIST DOTTYFIST", "DOTTYFIST") {
+    constructor() ERC20("TEST01 TEST01", "TEST01") {
         _mint(msg.sender, 22222 * 10**decimals());
 
         _burnStopAt = 2222 * 10**decimals();
