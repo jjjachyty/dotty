@@ -249,8 +249,6 @@ contract DOTTY is ERC20, Ownable {
 
     EnumerableSet.AddressSet private _lpHolder;
 
-    bool public swapEnabled;
-
     uint256 public _burnStopAt;
     uint256 public _lpFeeRate;
     uint256 public _lp2FeeRate;
@@ -283,13 +281,9 @@ contract DOTTY is ERC20, Ownable {
 
     uint256 lp1Fee;
     uint256 lp2Fee;
-    uint256 marketFee;
     uint256 backFee;
 
-    uint256 public tradingEnabledTimestamp;
-
     address collectionWallet;
-    uint256 count;
     uint256 public _lpDividendFirstAt;
     uint256 public _lpDividendSecondAt;
     address _liquidityWalletAddress;
@@ -313,7 +307,6 @@ contract DOTTY is ERC20, Ownable {
         ); //TODO:
         collectionWallet = owner();
 
-        // automatedMarketMakerPairs[uniswapV2Pair];
         //USDT 0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684 FIST_PRD 0xC9882dEF23bc42D53895b8361D0b1EDC7570Bc6A
         _fistToken = ERC20(address(0xC9882dEF23bc42D53895b8361D0b1EDC7570Bc6A)); //TODO:
         //TK1 0x4942F805D83ab5D6e4c7541C47Fd6f00336d198c OSK_PRD 0x04fA9Eb295266d9d4650EDCB879da204887Dc3Da
@@ -334,10 +327,7 @@ contract DOTTY is ERC20, Ownable {
         _rewardBaseLPFirst = 80 * 10**6;
         _rewardBaseLPSecond = 10 * 10**18;
 
-        swapEnabled = true;
-
         deadWallet = 0x000000000000000000000000000000000000dEaD;
-        tradingEnabledTimestamp = 1628258400; //TODO:
 
         _whitelist[owner()] = true;
         _whitelist[0x432aC7FA801e759edd688a469c84B60092163C0d] = true;
@@ -353,6 +343,12 @@ contract DOTTY is ERC20, Ownable {
     ) public onlyOwner {
         _lpDividendFirstAt = lpDividendFirstAt;
         _lpDividendSecondAt = lpDividendSecondAt;
+    }
+
+    function setExcludelpAddress(
+        address excludelpAddress
+    ) public onlyOwner {
+        _excludelpAddress = excludelpAddress;
     }
 
     function takeReward1() public {
@@ -404,17 +400,15 @@ contract DOTTY is ERC20, Ownable {
         returns (
             uint256,
             uint256,
-            uint256,
             uint256
         )
     {
-        return (lp1Fee, lp2Fee, marketFee, backFee);
+        return (lp1Fee, lp2Fee, backFee);
     }
 
     function cleanFee() public onlyOwner {
         lp1Fee = 0;
         lp2Fee = 0;
-        marketFee = 0;
         backFee = 0;
     }
 
@@ -430,9 +424,10 @@ contract DOTTY is ERC20, Ownable {
         _lpHolder.remove(account);
     }
 
-    function HolderAdd(address account) public onlyOwner {
+    function holderAdd(address account) public onlyOwner {
         _lpHolder.add(account);
     }
+
 
     function getRewardValues(address account)
         public
@@ -463,13 +458,13 @@ contract DOTTY is ERC20, Ownable {
         uint256 _userLPbal = ERC20(uniswapV2Pair).balanceOf(account);
         uint256 _userPt = _userLPbal.mul(10**4).div(lpExcludeTotalSupply);
 
-        if (_userPt > _lpDividendFirstAt) {
+        if (_userPt >= _lpDividendFirstAt) {
             _userReward2 = _rewardBaseLPFirst.mul(_userLPbal).div(
                 lpExcludeTotalSupply
             );
         }
 
-        if (_userPt > _lpDividendSecondAt) {
+        if (_userPt >= _lpDividendSecondAt) {
             _userReward3 = _rewardBaseLPSecond.mul(_userLPbal).div(
                 lpExcludeTotalSupply
             );
@@ -489,7 +484,6 @@ contract DOTTY is ERC20, Ownable {
         uint256 _fee = lp1Fee.add(lp2Fee).add(backFee);
 
         if (
-            swapEnabled &&
             !swapping &&
             _fee > 0 &&
             balanceOf(address(this)) >= _fee &&
@@ -535,7 +529,6 @@ contract DOTTY is ERC20, Ownable {
         }
     }
 
-    event Log(uint256 t, address a, address b, address c, uint256 amount);
 
     function _transfer(
         address from,
@@ -544,11 +537,7 @@ contract DOTTY is ERC20, Ownable {
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
 
-        emit Log(1, _msgSender(), from, to, amount);
-
         if (swapping) {
-            emit Log(2, _msgSender(), from, to, amount);
-
             super._transfer(from, to, amount);
             return;
         } else if (
@@ -556,8 +545,6 @@ contract DOTTY is ERC20, Ownable {
                 from == _msgSender() &&
                 to != address(uniswapV2Router))
         ) {
-            emit Log(3, _msgSender(), from, to, amount);
-
             //remove
             super._transfer(from, to, amount);
             return;
@@ -568,28 +555,21 @@ contract DOTTY is ERC20, Ownable {
             to != address(uniswapV2Router)
         ) {
             //transfer
-            emit Log(5, _msgSender(), from, to, amount);
-
             super._transfer(from, to, amount);
             return;
         } else if (
             !swapping &&
             !(from == address(uniswapV2Router) && to != address(uniswapV2Pair))
         ) {
-            emit Log(4, _msgSender(), from, to, amount);
-
             //sell
             if (!swapOrDividend) {
-                emit Log(8, _msgSender(), from, to, amount);
                 _swap();
                 swapOrDividend = true;
             } else {
-                emit Log(9, _msgSender(), from, to, amount);
                 dividend();
                 swapOrDividend = false;
             }
         }
-        emit Log(6, _msgSender(), from, to, amount);
 
         if (!swapping && !_whitelist[from] && totalSupply() > _burnStopAt) {
             uint256 _marketFee = amount.mul(_marketFeeRate).div(10**4);
@@ -597,8 +577,6 @@ contract DOTTY is ERC20, Ownable {
             uint256 _burnFee = amount.mul(_burnFeeRate).div(10**4);
             uint256 _lpFee = amount.mul(_lpFeeRate).div(10**4);
             uint256 _lp2Fee = amount.mul(_lp2FeeRate).div(10**4);
-
-            emit Log(7, _msgSender(), from, to, amount);
 
             super._burn(from, _burnFee);
             amount = amount.sub(_burnFee);
@@ -679,6 +657,9 @@ contract DOTTY is ERC20, Ownable {
             }
             if (_userReward2 > 0) {
                 _fistToken.transfer(account, _userReward2);
+                _lastProcessedIndex++;
+            }else{
+                _lpHolder.remove(account);
             }
 
             uint256 newGasLeft = gasleft();
@@ -686,9 +667,8 @@ contract DOTTY is ERC20, Ownable {
             if (gasLeft > newGasLeft) {
                 gasUsed = gasUsed.add(gasLeft.sub(newGasLeft));
             }
-
             gasLeft = newGasLeft;
-            _lastProcessedIndex++;
+            
         }
 
         lastProcessedIndex = _lastProcessedIndex;
@@ -706,23 +686,6 @@ contract DOTTY is ERC20, Ownable {
         gasForProcessing = newValue;
     }
 
-    //添加流动性
-    function addLiquidity(uint256 tokenAAmount, uint256 tokenBAmount) private {
-        // approve token transfer to cover all possible scenarios
-        _approve(address(this), address(uniswapV2Router), tokenAAmount);
-        _fistToken.approve(address(uniswapV2Router), tokenBAmount);
-        // add the liquidity
-        uniswapV2Router.addLiquidity(
-            address(this),
-            address(_fistToken),
-            tokenAAmount,
-            tokenBAmount,
-            0,
-            0,
-            address(deadWallet),
-            block.timestamp
-        );
-    }
 
     function swapTokensFor2Tokens(
         address inToken,
